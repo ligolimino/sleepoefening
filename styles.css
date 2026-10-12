@@ -409,7 +409,7 @@ button {
 }
 .tile {
     min-width: var(--gap-h, 1.4em);
-    height: var(--gap-h, 1.4em);
+    height: var(--gap-h, 1.6em);
     /* Weinig opvulling: het kaartje is net breed genoeg voor de letters. */
     padding: 0 0.1em;
     border: 2px solid var(--teal);
@@ -421,7 +421,7 @@ button {
     /* Iets kleiner dan de gegeven letters, zodat het kaartje met kader
        niet groter oogt dan de rest van het woord. */
     font-size: 0.9em;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 1;
     white-space: nowrap;
     box-shadow: var(--tile-shadow);
