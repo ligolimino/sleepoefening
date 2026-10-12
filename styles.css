@@ -264,7 +264,7 @@ button {
 }
 .gap::after {
     /* Plusteken in een leeg vakje */
-    content: "+";
+    content: none;
     color: var(--ink);
     font-weight: 700;
     font-size: 0.62em;
