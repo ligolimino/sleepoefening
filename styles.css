@@ -353,7 +353,9 @@ button {
     color: var(--bad);
 }
 .feedback > .icon {
-    width: 32px;
+    /* Even breed als de knoppen ernaast, zodat het rijtje mooi
+       gecentreerd onder de oplossing staat. */
+    width: 44px;
     height: 32px;
     stroke-width: 3;
 }
@@ -605,4 +607,24 @@ button {
 }
 .exercise .gap .tile-text {
     transform: translateY(var(--gap-dy, 0));
+}
+
+
+/* Luisterknop voor het woord en het nakijkrijtje delen één plaats onder de
+   oefening. Na het nakijken verdwijnt de luisterknop, zonder dat de
+   oefening verspringt. */
+.below {
+    flex: none;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+}
+.below > * {
+    grid-area: 1 / 1;
+}
+.app.has-result .below .word-audio {
+    visibility: hidden;
+}
+.app.compact .feedback > .icon {
+    width: 34px;
 }

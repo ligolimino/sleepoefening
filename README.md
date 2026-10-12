@@ -188,3 +188,15 @@ Laat je **Audio woord/zin** leeg bij een zin, dan zoekt de tool in
 `assets/audio/oefeningen/` naar een opname met de zin als naam, zonder
 leesteken op het einde. Voor "Ik [drink] koffie." werkt bijvoorbeeld
 `Ik drink koffie.mp3`, `ik drink koffie.mp3` of `ik-drink-koffie.mp3`.
+
+## Welke luisterknop staat waar?
+
+| Moment | Knop | Wanneer |
+|---|---|---|
+| Tijdens de oefening | kleine luisterknop boven elk vakje (losse klank of woord) | met `klank=ja` |
+| Tijdens de oefening | ronde afspeelknop onder het woord (hele woord of zin) | alleen in de volledige versie, en **niet** samen met `klank=ja` |
+| Na het nakijken | luisterknop in het rijtje met vinkje en Opnieuw | met `luister=ja` |
+
+De afspeelknop onder het woord verdwijnt zodra de oefening nagekeken is. Op
+die plaats verschijnt dan het rijtje met het vinkje (of kruisje), eventueel
+de luisterknop, en de knop Opnieuw, mooi gecentreerd onder de oplossing.
