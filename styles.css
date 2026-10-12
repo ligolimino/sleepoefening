@@ -673,3 +673,20 @@ button {
 .gap {
     flex-shrink: 0 !important;
 }
+
+
+.gap .tile {
+    padding: 0;
+    overflow: hidden;
+    font-size: 0.8em;
+}
+
+.gap .tile-text {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+    font-size: 0.8em;
+    line-height: 1;
+}
