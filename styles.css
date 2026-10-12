@@ -30,7 +30,8 @@
     --bad-soft: #fee7ed;
     --shadow: 0 12px 34px rgba(20, 67, 79, 0.13);
     /* Zachte schaduw rondom de kaartjes */
-    --tile-shadow: 0 4px 12px rgba(20, 67, 79, 0.15);
+    --tile-shadow: 0 8px 12px rgba(20, 67, 79, 0.20);
+	
 }
 
 /* ================================================================
@@ -332,6 +333,12 @@ button {
 .word-audio {
     display: flex;
     justify-content: center;
+}
+
+.exercise .chunk,
+.exercise .text,
+.gap-holder {
+    flex: none;
 }
 
 /* ================================================================
