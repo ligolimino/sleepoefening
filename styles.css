@@ -606,7 +606,7 @@ button {
 .tile-text {
     display: block;
     line-height: 1;
-    transform: translateY(var(--dy, 0.8));
+    transform: translateY(var(--dy, 0.6));
 }
 .exercise .text {
     display: inline-block;
