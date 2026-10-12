@@ -233,7 +233,7 @@ button {
     align-items: center;
     justify-content: center;
     font-size: var(--fs);
-    line-height: 1;
+    line-height: 1.15;
     font-weight: 700;
 }
 .exercise.sentence {
@@ -287,7 +287,7 @@ button {
     color: var(--ink);
     font-weight: 700;
     font-size: 0.62em;
-    line-height: 1;
+    line-height: 1.15;
 }
 .gap.filled::after,
 .gap.target::after {
@@ -299,7 +299,6 @@ button {
 }
 .gap.filled {
     cursor: pointer;
-	font-size: 0.8em;
 }
 .gap .tile {
     position: absolute;
@@ -419,7 +418,7 @@ button {
     min-width: var(--gap-h, 1.4em);
     height: var(--gap-h, 2.1em);
     /* Weinig opvulling: het kaartje is net breed genoeg voor de letters. */
-    padding: 0 0;
+    padding: 0 0.1em;
     border: 2px solid var(--teal);
     border-radius: 8px;
     background: #fff;
@@ -430,7 +429,7 @@ button {
        niet groter oogt dan de rest van het woord. */
     font-size: 0.9em;
     font-weight: 500;
-    line-height: 1;
+    line-height: 1.15;
     white-space: nowrap;
     box-shadow: var(--tile-shadow);
     touch-action: none;
