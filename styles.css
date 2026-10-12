@@ -1,0 +1,505 @@
+/* ================================================================
+   Letterlab — sleepoefening
+   1. Lettertype en kleuren
+   ================================================================ */
+
+@font-face {
+    font-family: Andika;
+    src: url("assets/fonts/andika-400.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: Andika;
+    src: url("assets/fonts/andika-700.woff2") format("woff2");
+    font-weight: 700;
+    font-display: swap;
+}
+:root {
+    /* Dezelfde hoofdkleuren als in het klik-klakboekje en het dictee. */
+    --ink: #173042;
+    --teal: #087f8c;
+    --teal-dark: #08646d;
+    --blue: #d9f2f4;
+    --pink: #e7427a;
+    --paper: #f7fbfb;
+    --line: #c8dfe1;
+    --good: #16805d;
+    --good-soft: #e3f4ec;
+    --bad: #c53b56;
+    --bad-soft: #fee7ed;
+    --shadow: 0 12px 34px rgba(20, 67, 79, 0.13);
+    --tile-shadow: 0 3px 0 rgba(8, 100, 109, 0.22);
+}
+
+/* ================================================================
+   2. Basis
+   ================================================================ */
+
+* {
+    box-sizing: border-box;
+}
+html,
+body {
+    margin: 0;
+    height: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Andika, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+html.compact,
+html.compact body {
+    /* De onderkant voor Genially laat de achtergrond van de dia zien. */
+    background: transparent;
+}
+button {
+    font: inherit;
+    touch-action: manipulation;
+}
+.svg-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+.icon {
+    width: 1.65rem;
+    height: 1.65rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.icon.filled {
+    fill: currentColor;
+    stroke-width: 1.5;
+}
+
+/* --fs is de lettergrootte van de oefening. app.js berekent ze zo dat
+   alles op het scherm past. */
+.app {
+    --fs: 56px;
+    height: 100svh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ================================================================
+   3. Ronde afspeelknoppen
+   ================================================================ */
+
+.play-btn {
+    width: 52px;
+    height: 52px;
+    flex: none;
+    border: 0;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: var(--tile-shadow);
+}
+.play-btn .icon {
+    width: 24px;
+    height: 24px;
+}
+.play-btn:focus-visible {
+    outline: 3px solid rgba(231, 66, 122, 0.45);
+    outline-offset: 3px;
+}
+.play-btn.is-playing {
+    background: var(--teal);
+}
+.play-btn.is-hidden {
+    visibility: hidden;
+}
+
+/* ================================================================
+   4. Volledige versie: instructie, afbeelding, oefening
+   ================================================================ */
+
+.instruction-bar {
+    flex: none;
+    display: flex;
+    justify-content: center;
+    padding: 12px 16px;
+    background: #f3f7ea;
+    border-bottom: 1px solid var(--line);
+}
+.stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px 10px;
+    background: #fff;
+}
+/* Verticaal centreren zonder dat iets boven het vlak uitsteekt. */
+.stage > :first-child {
+    margin-top: auto;
+}
+.stage > :last-child {
+    margin-bottom: auto;
+}
+
+/* Breed en laag scherm (gsm liggend, laptop): afbeelding links,
+   oefening rechts. */
+.app.wide .stage {
+    display: grid;
+    grid-template-columns: auto minmax(0, auto);
+    grid-auto-rows: auto;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    column-gap: clamp(16px, 5vw, 48px);
+}
+.app.wide .stage > :first-child,
+.app.wide .stage > :last-child {
+    margin: 0;
+}
+.app.wide .picture {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: center;
+}
+.app.wide .stage > :not(.picture) {
+    grid-column: 2;
+}
+.app.wide .picture img {
+    max-width: 42vw;
+}
+.picture {
+    flex: none;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+.picture img {
+    display: block;
+    max-width: min(78vw, 340px);
+    max-height: var(--img-h, 34svh);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    object-fit: contain;
+    background: #fff;
+}
+
+/* In de onderkant voor Genially staat de oefening zonder extra vlak,
+   en staan oefening en kaartjes dicht bij elkaar in het midden. */
+.app.compact {
+    justify-content: center;
+}
+.app.compact .stage {
+    flex: none;
+    background: transparent;
+    padding: 8px 16px 2px;
+}
+
+/* ================================================================
+   5. De oefenregel: vaste letters of woorden en de vakjes
+   ================================================================ */
+
+.exercise {
+    max-width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--fs);
+    line-height: 1.15;
+    font-weight: 700;
+}
+.exercise.sentence {
+    flex-wrap: wrap;
+    row-gap: 0.28em;
+    column-gap: 0.28em;
+    font-weight: 400;
+}
+.exercise .text {
+    white-space: pre;
+}
+.exercise.sentence .text {
+    white-space: normal;
+}
+/* Een woord en het leesteken erna blijven bij elkaar op één regel. */
+.exercise .chunk {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.gap {
+    --c: var(--teal);
+    position: relative;
+    flex: none;
+    width: var(--gap-w, 1.4em);
+    height: var(--gap-h, 1.4em);
+    margin: 0 0.06em;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    touch-action: none;
+    cursor: default;
+    transition: background-color 0.15s;
+    /* Hoekjes zoals in Genially */
+    background:
+        linear-gradient(var(--c), var(--c)) top left / 0.32em 3px no-repeat,
+        linear-gradient(var(--c), var(--c)) top left / 3px 0.32em no-repeat,
+        linear-gradient(var(--c), var(--c)) top right / 0.32em 3px no-repeat,
+        linear-gradient(var(--c), var(--c)) top right / 3px 0.32em no-repeat,
+        linear-gradient(var(--c), var(--c)) bottom left / 0.32em 3px no-repeat,
+        linear-gradient(var(--c), var(--c)) bottom left / 3px 0.32em no-repeat,
+        linear-gradient(var(--c), var(--c)) bottom right / 0.32em 3px no-repeat,
+        linear-gradient(var(--c), var(--c)) bottom right / 3px 0.32em no-repeat;
+}
+.gap::after {
+    /* Plusteken in een leeg vakje */
+    content: "+";
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 0.62em;
+    line-height: 1;
+}
+.gap.filled::after,
+.gap.target::after {
+    content: none;
+}
+.gap.near {
+    --c: var(--pink);
+    background-color: rgba(231, 66, 122, 0.08);
+}
+.gap.filled {
+    cursor: pointer;
+}
+.gap .tile {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    box-shadow: none;
+}
+.gap.good .tile {
+    border-color: var(--good);
+    background: var(--good-soft);
+    color: var(--good);
+}
+.gap.wrong .tile {
+    border-color: var(--bad);
+    background: var(--bad-soft);
+    color: var(--bad);
+}
+.gap.wrong {
+    animation: shake 0.28s linear 2;
+}
+@keyframes shake {
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+.word-audio {
+    display: flex;
+    justify-content: center;
+}
+
+/* ================================================================
+   6. Terugkoppeling
+   ================================================================ */
+
+.feedback {
+    flex: none;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+.feedback.good {
+    color: var(--good);
+}
+.feedback.bad {
+    color: var(--bad);
+}
+.feedback > .icon {
+    width: 32px;
+    height: 32px;
+    stroke-width: 3;
+}
+.retry-btn {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--bad-soft);
+    color: var(--bad);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+.retry-btn .icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* ================================================================
+   7. Keuzevak onderaan met de sleepkaartjes
+   ================================================================ */
+
+.bank {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: calc(var(--fs) * 0.22);
+    padding: 16px max(16px, env(safe-area-inset-left))
+        calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: #fff;
+    font-size: var(--fs);
+}
+.app.compact .bank {
+    border-top: 0;
+    background: transparent;
+    padding-top: 6px;
+}
+.tile {
+    min-width: var(--gap-h, 1.4em);
+    height: var(--gap-h, 1.4em);
+    padding: 0 0.22em;
+    border: 3px solid var(--teal);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    display: grid;
+    place-items: center;
+    font-size: 1em;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: var(--tile-shadow);
+    touch-action: none;
+    cursor: grab;
+}
+.sentence-mode .tile {
+    font-weight: 400;
+}
+.bank .tile:focus-visible {
+    outline: 3px solid rgba(231, 66, 122, 0.45);
+    outline-offset: 3px;
+}
+.bank .tile.used {
+    /* Bij "Gebruikte keuzes verdwijnen" blijft de plaats leeg bewaard,
+       zodat de andere kaartjes niet verspringen. */
+    visibility: hidden;
+}
+.tile.ghost {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    margin: 0;
+    pointer-events: none;
+    cursor: grabbing;
+    box-shadow: 0 10px 24px rgba(20, 67, 79, 0.28);
+}
+.tile.ghost.lifted {
+    transform-origin: center;
+}
+.app.done .tile,
+.app.done .gap {
+    cursor: default;
+}
+
+/* ================================================================
+   8. Uitlegpagina voor de lesgever (zonder oefening in de link)
+   ================================================================ */
+
+.help {
+    width: min(100%, 760px);
+    margin: 0 auto;
+    padding: 20px 18px 40px;
+    overflow: auto;
+    line-height: 1.5;
+}
+.help h1 {
+    color: var(--teal);
+    font-size: 1.6rem;
+    margin: 0 0 8px;
+}
+.help code {
+    background: var(--blue);
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 0.95em;
+}
+.help table {
+    width: 100%;
+    table-layout: fixed;
+    overflow-wrap: anywhere;
+    border-collapse: collapse;
+    margin: 10px 0 16px;
+    font-size: 0.95rem;
+}
+.help th:first-child {
+    width: 34%;
+}
+.help th,
+.help td {
+    text-align: left;
+    vertical-align: top;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line);
+}
+.help a {
+    color: var(--teal-dark);
+}
+.help .warning {
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--bad-soft);
+    color: var(--bad);
+}
+
+/* Laag scherm (gsm liggend): smallere balk en kleinere knoppen. */
+@media (max-height: 480px) {
+    .instruction-bar {
+        padding: 5px 16px;
+    }
+    .play-btn {
+        width: 44px;
+        height: 44px;
+    }
+    .stage {
+        gap: 6px;
+        padding-top: 8px;
+        padding-bottom: 4px;
+    }
+    .bank {
+        padding-top: 10px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    }
+    .feedback {
+        height: 36px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gap.wrong {
+        animation: none;
+    }
+}
