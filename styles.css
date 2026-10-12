@@ -628,3 +628,15 @@ button {
 .app.compact .feedback > .icon {
     width: 34px;
 }
+
+/* Ingevulde letters exact op één lijn met de gegeven letters:
+   zelfde lettergrootte en geen verschuiving. */
+.exercise .text {
+    transform: none;
+}
+.exercise .gap .tile {
+    font-size: 1em;
+}
+.exercise .gap .tile-text {
+    transform: none;
+}
