@@ -654,3 +654,7 @@ button {
     font-size: 0.8em;
     padding: 0 0.18em;
 }
+
+.app.has-result .sound-btn {
+    visibility: hidden;
+}
