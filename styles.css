@@ -640,3 +640,10 @@ button {
 .exercise .gap .tile-text {
     transform: none;
 }
+
+/* Letters in het keuzevak (en tijdens het slepen) niet verschuiven:
+   zelfde uitlijning als in de verbetering. */
+.bank .tile-text,
+.tile.ghost .tile-text {
+    transform: none;
+}
