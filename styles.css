@@ -419,7 +419,7 @@ button {
     min-width: var(--gap-h, 1.4em);
     height: var(--gap-h, 2.1em);
     /* Weinig opvulling: het kaartje is net breed genoeg voor de letters. */
-    padding: 0 0.03em;
+    padding: 0 0;
     border: 2px solid var(--teal);
     border-radius: 8px;
     background: #fff;
