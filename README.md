@@ -167,6 +167,7 @@ Wordt niets gevonden, dan blijft de knop boven dat vakje weg.
 
 ## Wat er gebeurt na een juist antwoord
 
+- Alle kaartjes in het keuzevak verdwijnen (de plaats blijft bewaard).
 - De vakjes worden groen en krimpen tot de breedte van het juiste
   antwoord. Tijdens de oefening zijn alle vakjes even breed, zodat de
   breedte geen hint geeft.
@@ -176,6 +177,14 @@ Wordt niets gevonden, dan blijft de knop boven dat vakje weg.
 
 ## Letters in het midden
 
-De tool meet bij het laden waar de letters van elk kaartje staan en zet ze
-precies in het midden. In het woord of de zin zelf staan alle letters op
-één lijn, ook die in de vakjes. Daar hoef je niets voor te doen.
+De tool meet bij het laden waar de letters staan en zet ze zo goed mogelijk
+in het midden van de kaartjes. Alle kaartjes delen één basislijn, zodat de
+letters onderling op één lijn blijven. In het woord of de zin staan alle
+letters op één lijn, ook die in de vakjes. Daar hoef je niets voor te doen.
+
+## Audio bij een zin
+
+Laat je **Audio woord/zin** leeg bij een zin, dan zoekt de tool in
+`assets/audio/oefeningen/` naar een opname met de zin als naam, zonder
+leesteken op het einde. Voor "Ik [drink] koffie." werkt bijvoorbeeld
+`Ik drink koffie.mp3`, `ik drink koffie.mp3` of `ik-drink-koffie.mp3`.

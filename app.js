@@ -340,7 +340,17 @@
             if (found) {
                 button.classList.remove("is-hidden");
             } else {
+                const holder = button.parentElement;
                 button.remove();
+                // Een lege instructiebalk of lege rij verdwijnt mee.
+                if (
+                    holder &&
+                    (holder.classList.contains("instruction-bar") ||
+                        holder.classList.contains("word-audio")) &&
+                    holder.children.length === 0
+                ) {
+                    holder.remove();
+                }
                 // Niet opnieuw schalen tijdens de verbetering: dan staan de
                 // vakjes al op de breedte van het antwoord.
                 if (!state.result) {
@@ -366,8 +376,22 @@
         // Geen audio opgegeven: bij één woord zoeken we zelf een opname,
         // eerst in deze repository en daarna bij het klik-klakboekje.
         const word = fullText.trim().toLowerCase();
-        if (!word || /\s/.test(word)) {
+        if (!word) {
             return [];
+        }
+        if (/\s/.test(word)) {
+            // Een zin: zoek een opname met de zin zelf als naam, zonder
+            // leestekens op het einde. Bv. "de koffie" vindt
+            // "de koffie.mp3" of "de-koffie.mp3" in assets/audio/oefeningen/.
+            const sentence = fullText.trim().replace(/[.?!,;:]+$/, "");
+            const names = [
+                sentence,
+                sentence.toLowerCase(),
+                sentence.toLowerCase().replace(/[^a-z0-9à-ÿ\s-]/g, "").replace(/\s+/g, "-"),
+            ];
+            return [...new Set(names)].map(
+                (name) => EXERCISE_AUDIO_FOLDER + encodePath(name + ".mp3"),
+            );
         }
         const file = encodeURIComponent(word) + ".mp3";
         const first = encodeURIComponent(word.charAt(0));
@@ -699,9 +723,12 @@
     // als de t in een vakje staat.
     function centerTexts() {
         const weight = isSentence ? 400 : 700;
+        // Alle kaartjes krijgen dezelfde verschuiving, zodat de letters
+        // onderling op één basislijn blijven staan. De verschuiving zet de
+        // letters van alle kaartjes samen zo goed mogelijk in het midden.
+        const bankOffset = inkOffset(choices.join(""), weight);
         tileNodes.forEach((tile) => {
-            const offset = inkOffset(tile.textContent, weight);
-            tile.firstChild.style.setProperty("--dy", `${(-offset).toFixed(3)}em`);
+            tile.firstChild.style.setProperty("--dy", `${(-bankOffset).toFixed(3)}em`);
         });
 
         const rowOffset = inkOffset(fullText.replace(/\s+/g, " "), weight);
@@ -883,12 +910,10 @@
             feedbackNode.appendChild(retryButton("good"));
             app.classList.add("done");
             fitGapsToAnswers();
-            // De kaartjes die niet in het antwoord horen, verdwijnen.
-            tileNodes.forEach((tile, index) => {
-                if (!answers.includes(choices[index])) {
-                    tile.classList.add("cleared");
-                }
-            });
+            // Alle kaartjes in het keuzevak verdwijnen: het antwoord staat
+            // nu in de vakjes. De plaats blijft bewaard, zodat niets
+            // verspringt.
+            tileNodes.forEach((tile) => tile.classList.add("cleared"));
         } else {
             correct.forEach((ok, index) => {
                 if (!ok) {
