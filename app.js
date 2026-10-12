@@ -28,6 +28,12 @@
     // gebruiken zonder ze te kopiëren.
     const KLIKKLAK_WORD_AUDIO = "../klikklak/assets/audio/woorden/";
 
+    // Losse klanken voor de luisterknop boven een vakje (optie klank=ja).
+    // Eerst een eigen opname in deze repository, daarna de vaste klanken
+    // van het klik-klakboekje.
+    const SOUND_FOLDER = "assets/audio/klanken/";
+    const KLIKKLAK_SOUNDS = "../klikklak/assets/audio/klanken/";
+
     // Bestandstypes die geprobeerd worden als je geen extensie typt.
     const IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".jpeg"];
     const AUDIO_EXTENSIONS = [".mp3", ".m4a", ".wav"];
@@ -60,6 +66,7 @@
         choices: param("keuzes"),
         shuffle: isYes(param("mix")),
         useUp: isYes(param("weg")),
+        sound: isYes(param("klank")),
         // Zonder "weergave=volledig" alleen de onderkant, net als bij het
         // dictee en het klik-klakboekje.
         compact: param("weergave").toLowerCase() !== "volledig",
@@ -209,9 +216,13 @@
                 this.audio.currentTime = 0;
             }
             if (this.button) {
+                const restIcon = this.button.dataset.icon || "play";
                 this.button.classList.remove("is-playing");
-                setIcon(this.button, "play", true);
-                this.button.setAttribute("aria-label", "Luister");
+                setIcon(this.button, restIcon, restIcon === "play");
+                this.button.setAttribute(
+                    "aria-label",
+                    this.button.dataset.label || "Luister",
+                );
             }
             this.audio = null;
             this.button = null;
@@ -322,6 +333,42 @@
         ];
     }
 
+    // Wat moet de luisterknop boven een vakje laten horen? Bij letters en
+    // klankgroepen de klank (ij en ei delen één opname), bij een woord in
+    // een zin de woordopname.
+    function soundCandidates(answer) {
+        const value = answer.trim().toLowerCase();
+        const soundName = value === "ij" || value === "ei" ? "ij-ei" : value;
+        const soundFile = encodeURIComponent(soundName) + ".mp3";
+        const wordFile = encodeURIComponent(value) + ".mp3";
+        const first = encodeURIComponent(value.charAt(0));
+        return [
+            SOUND_FOLDER + soundFile,
+            KLIKKLAK_SOUNDS + soundFile,
+            EXERCISE_AUDIO_FOLDER + wordFile,
+            `${KLIKKLAK_WORD_AUDIO}${first}/${wordFile}`,
+        ];
+    }
+
+    // Kleine luidsprekerknop boven een leeg vakje.
+    function soundButton(answer) {
+        const button = el("button", "sound-btn is-hidden");
+        button.type = "button";
+        button.dataset.icon = "speaker";
+        button.dataset.label = "Luister naar de klank";
+        button.setAttribute("aria-label", "Luister naar de klank");
+        setIcon(button, "speaker", false);
+        let source = null;
+        findAudio(soundCandidates(answer)).then((found) => {
+            source = found;
+            if (found) {
+                button.classList.remove("is-hidden");
+            }
+        });
+        button.addEventListener("click", () => player.toggle(button, source));
+        return button;
+    }
+
     /* ------------------------------------------------------------
        Uitlegpagina als er geen (geldige) oefening in de link staat
        ------------------------------------------------------------ */
@@ -353,6 +400,7 @@
                 <tr><td><code>keuzes=</code></td><td>Kaartjes, gescheiden door komma's.
                     De juiste antwoorden worden altijd toegevoegd.</td></tr>
                 <tr><td><code>mix=ja</code></td><td>Kaartjes in willekeurige volgorde.</td></tr>
+                <tr><td><code>klank=ja</code></td><td>Boven elk vakje een luisterknop met de klank (of het woord) die erin moet.</td></tr>
                 <tr><td><code>weg=ja</code></td><td>Een gebruikt kaartje verdwijnt uit het keuzevak.</td></tr>
                 <tr><td><code>weergave=volledig</code></td><td>Volledige versie met instructie, afbeelding en audio. Zonder deze toevoeging: alleen de onderkant, voor Genially.</td></tr>
                 <tr><td><code>instructie=</code></td><td>Instructie-audio uit <code>${INSTRUCTION_FOLDER}</code> of een volledige link.</td></tr>
@@ -429,6 +477,9 @@
 
     function buildExerciseRow() {
         const row = el("div", isSentence ? "exercise sentence" : "exercise");
+        if (settings.sound) {
+            row.classList.add("with-sound");
+        }
         let chunk = el("span", "chunk");
         let gapIndex = 0;
 
@@ -447,7 +498,16 @@
                 gap.setAttribute("aria-label", "Leeg vakje");
                 gap.tabIndex = -1;
                 gapNodes.push(gap);
-                chunk.appendChild(gap);
+                if (settings.sound) {
+                    // Houder: de luisterknop zweeft boven het vakje, zodat
+                    // de letters op één lijn blijven staan.
+                    const holder = el("span", "gap-holder");
+                    holder.appendChild(soundButton(part.answer));
+                    holder.appendChild(gap);
+                    chunk.appendChild(holder);
+                } else {
+                    chunk.appendChild(gap);
+                }
                 gapIndex += 1;
                 return;
             }
@@ -639,7 +699,7 @@
     // Alle vakjes en kaartjes krijgen dezelfde hoogte. De vakjes zijn zo
     // breed als het breedste kaartje, zodat elk kaartje erin past.
     function sizeGaps() {
-        const height = "1.45em";
+        const height = "1.32em";
         app.style.setProperty("--gap-h", height);
         app.style.removeProperty("--gap-w");
         let widest = 0;
@@ -720,7 +780,14 @@
             gapNodes.forEach((gap) => gap.classList.add("good"));
             feedbackNode.className = "feedback good";
             feedbackNode.appendChild(icon("check"));
+            feedbackNode.appendChild(retryButton("good"));
             app.classList.add("done");
+            // De kaartjes die niet in het antwoord horen, verdwijnen.
+            tileNodes.forEach((tile, index) => {
+                if (!answers.includes(choices[index])) {
+                    tile.classList.add("cleared");
+                }
+            });
         } else {
             correct.forEach((ok, index) => {
                 if (!ok) {
@@ -729,12 +796,7 @@
             });
             feedbackNode.className = "feedback bad";
             feedbackNode.appendChild(icon("close"));
-            const retry = el("button", "retry-btn");
-            retry.type = "button";
-            retry.setAttribute("aria-label", "Opnieuw");
-            retry.appendChild(icon("retry"));
-            retry.addEventListener("click", resetAll);
-            feedbackNode.appendChild(retry);
+            feedbackNode.appendChild(retryButton("bad"));
         }
 
         // Genially of een andere omringende pagina kan dit opvangen.
@@ -748,7 +810,18 @@
         }
     }
 
+    // Knop om de oefening helemaal opnieuw te beginnen.
+    function retryButton(kind) {
+        const retry = el("button", `retry-btn ${kind}`);
+        retry.type = "button";
+        retry.setAttribute("aria-label", "Opnieuw");
+        retry.appendChild(icon("retry"));
+        retry.addEventListener("click", resetAll);
+        return retry;
+    }
+
     function resetAll() {
+        tileNodes.forEach((tile) => tile.classList.remove("cleared"));
         clearResult();
         state.filled = state.filled.map(() => null);
         gapNodes.forEach((gap, index) => renderGap(index));
@@ -790,7 +863,8 @@
         const ghost = el("div", "tile ghost", text);
         ghost.style.width = `${rect.width}px`;
         ghost.style.height = `${rect.height}px`;
-        ghost.style.fontSize = getComputedStyle(app).getPropertyValue("--fs");
+        // Zelfde lettergrootte als de kaartjes in het keuzevak.
+        ghost.style.fontSize = getComputedStyle(tileNodes[0]).fontSize;
         ghost.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
         app.appendChild(ghost);
         return ghost;

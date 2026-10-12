@@ -66,6 +66,7 @@ over meerdere regels. Een leesteken blijft bij het woord ervoor staan.
 | `oef=ka[t]` | De oefening (verplicht). |
 | `keuzes=m,t,k` | De kaartjes, in deze volgorde. De juiste antwoorden worden altijd toegevoegd, ook als je ze vergeet. Leeg: alleen de juiste antwoorden, door elkaar. |
 | `mix=ja` | De kaartjes staan in willekeurige volgorde, elke keer anders. |
+| `klank=ja` | Boven elk vakje staat een kleine luisterknop met de klank die erin moet (bij een zin: het woord). Werkt in beide weergaven. |
 | `weg=ja` | Een gebruikt kaartje verdwijnt uit het keuzevak. Zonder deze optie blijft het staan en kan het meerdere keren gebruikt worden (handig bij `[k]i[k]`). |
 | `weergave=volledig` | De volledige versie. Zonder deze toevoeging krijg je alleen de onderkant, voor Genially. Instructie, afbeelding en audio worden dan genegeerd. |
 | `instructie=sleep` | Instructie-audio uit `assets/audio/instructies/`. |
@@ -83,6 +84,7 @@ Zet je bestanden in deze mappen. Op github.com open je de map en kies je
 | `assets/afbeeldingen/` | afbeeldingen (`.jpg`, `.png` of `.webp`) |
 | `assets/audio/instructies/` | instructie-audio (`.mp3`) |
 | `assets/audio/oefeningen/` | audio van een woord of zin (`.mp3`) |
+| `assets/audio/klanken/` | eigen klankopnames voor de luisterknop boven een vakje (`.mp3`), alleen nodig als je een andere opname wilt dan die van het klik-klakboekje |
 
 - In Excel typ je alleen de bestandsnaam. De extensie mag je weglaten:
   `kat` vindt `kat.jpg`, `kat.png` of `kat.webp`.
@@ -148,3 +150,16 @@ tonen telefoons nog een tijd de oude versie.
 
 Andika valt onder de SIL Open Font License, zie
 `assets/fonts/OFL-LICENSE.txt`.
+
+## Luisterknop boven een vakje
+
+Met **Klank boven vakje? = Ja** in Excel (in de link: `klank=ja`) staat boven
+elk vakje een luisterknop. De tool zoekt de opname in deze volgorde:
+
+1. `assets/audio/klanken/klank.mp3` in deze repository;
+2. de vaste klanken van het klik-klakboekje (`klikklak/assets/audio/klanken/`),
+   met `ij-ei.mp3` voor zowel `ij` als `ei`;
+3. bij een woord: `assets/audio/oefeningen/woord.mp3` en daarna de
+   woordopname van het klik-klakboekje.
+
+Wordt niets gevonden, dan blijft de knop boven dat vakje weg.
