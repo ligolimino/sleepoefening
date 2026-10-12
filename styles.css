@@ -30,7 +30,7 @@
     --bad-soft: #fee7ed;
     --shadow: 0 12px 34px rgba(20, 67, 79, 0.13);
     /* Zachte schaduw rondom de kaartjes */
-    --tile-shadow: 0 1px 6px rgba(20, 67, 79, 0.12);
+    --tile-shadow: 0 4px 12px rgba(20, 67, 79, 0.15);
 }
 
 /* ================================================================
@@ -409,7 +409,7 @@ button {
 }
 .tile {
     min-width: var(--gap-h, 1.4em);
-    height: var(--gap-h, 1.6em);
+    height: var(--gap-h, 2.1em);
     /* Weinig opvulling: het kaartje is net breed genoeg voor de letters. */
     padding: 0 0.1em;
     border: 2px solid var(--teal);
