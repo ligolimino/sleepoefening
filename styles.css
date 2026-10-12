@@ -236,7 +236,7 @@ button {
     font-weight: 700;
 }
 .exercise.sentence {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     row-gap: 0.28em;
     column-gap: 0.28em;
     font-weight: 400;
