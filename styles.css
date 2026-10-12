@@ -262,7 +262,7 @@ button {
     width: var(--gap-w, 1.0em);
     height: var(--gap-h, 1.0em);
     margin: 0 0.02em;
-    border-radius: 8px;
+    border-radius: 4px;
     display: grid;
     place-items: center;
     touch-action: none;
