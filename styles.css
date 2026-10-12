@@ -81,7 +81,7 @@ button {
 /* --fs is de lettergrootte van de oefening. app.js berekent ze zo dat
    alles op het scherm past. */
 .app {
-    --fs: 56px;
+    --fs: 50px;
     height: 100svh;
     min-height: 100svh;
     display: flex;
@@ -231,12 +231,12 @@ button {
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    font-size: var(--fs);
+    font-size: 1.1 * var(--fs);
     line-height: 1.15;
     font-weight: 700;
 }
 .exercise.sentence {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     row-gap: 0.28em;
     column-gap: 0.28em;
     font-weight: 400;
@@ -396,8 +396,8 @@ button {
     align-content: center;
     justify-content: center;
     gap: calc(var(--fs) * 0.22);
-    padding: 16px max(16px, env(safe-area-inset-left))
-        calc(16px + env(safe-area-inset-bottom));
+    padding: 12px max(12px, env(safe-area-inset-left))
+        calc(12px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);
     background: #fff;
     font-size: var(--fs);
@@ -406,7 +406,6 @@ button {
     border-top: 0;
     background: transparent;
     padding: 4px 2px calc(4px + env(safe-area-inset-bottom));
-	flex-wrap: nowrap;
 }
 .tile {
     min-width: var(--gap-h, 1.4em);
@@ -430,7 +429,7 @@ button {
     cursor: grab;
 }
 .sentence-mode .tile {
-    font-weight: 400;
+    font-weight: 300;
 }
 .bank .tile:focus-visible {
     outline: 3px solid rgba(231, 66, 122, 0.45);
