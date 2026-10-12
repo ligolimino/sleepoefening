@@ -233,7 +233,7 @@ button {
     align-items: center;
     justify-content: center;
     font-size: var(--fs);
-    line-height: 1.15;
+    line-height: 1;
     font-weight: 700;
 }
 .exercise.sentence {
@@ -299,6 +299,7 @@ button {
 }
 .gap.filled {
     cursor: pointer;
+	font-size: 0.8em;
 }
 .gap .tile {
     position: absolute;
@@ -606,7 +607,7 @@ button {
 .tile-text {
     display: block;
     line-height: 1;
-    transform: translateY(var(--dy, 0.6));
+    transform: translateY(var(--dy, 0.8));
 }
 .exercise .text {
     display: inline-block;
