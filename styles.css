@@ -665,3 +665,11 @@ button {
 .app.has-result .sound-btn {
     visibility: hidden;
 }
+
+/* Forceer dat onderdelen van de oefening niet overlappen */
+.exercise .chunk,
+.exercise .text,
+.gap-holder,
+.gap {
+    flex-shrink: 0 !important;
+}
