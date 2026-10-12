@@ -243,9 +243,9 @@ button {
     --c: var(--teal);
     position: relative;
     flex: none;
-    width: var(--gap-w, 1.4em);
-    height: var(--gap-h, 1.4em);
-    margin: 0 0.06em;
+    width: var(--gap-w, 1.0em);
+    height: var(--gap-h, 1.0em);
+    margin: 0 0.02em;
     border-radius: 8px;
     display: grid;
     place-items: center;
