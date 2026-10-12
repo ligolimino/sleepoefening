@@ -228,7 +228,7 @@ button {
 .exercise {
     max-width: 100%;
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     font-size: var(--fs);
@@ -406,6 +406,7 @@ button {
     border-top: 0;
     background: transparent;
     padding: 4px 2px calc(4px + env(safe-area-inset-bottom));
+	flex-wrap: nowrap;
 }
 .tile {
     min-width: var(--gap-h, 1.4em);
@@ -653,5 +654,4 @@ button {
 .tile {
     font-size: 1em;
     padding: 0 0.18em;
-	flex-wrap: nowrap;
 }
