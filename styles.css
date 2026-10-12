@@ -190,7 +190,7 @@ button {
     display: block;
     max-width: min(78vw, 340px);
     max-height: var(--img-h, 34svh);
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: var(--shadow);
     object-fit: contain;
     background: #fff;
@@ -420,7 +420,7 @@ button {
     /* Weinig opvulling: het kaartje is net breed genoeg voor de letters. */
     padding: 0 0.1em;
     border: 2px solid var(--teal);
-    border-radius: 8px;
+    border-radius: 4px;
     background: #fff;
     color: var(--ink);
     display: grid;
