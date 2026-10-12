@@ -67,6 +67,8 @@
         shuffle: isYes(param("mix")),
         useUp: isYes(param("weg")),
         sound: isYes(param("klank")),
+        // Na een juist antwoord een luisterknop voor het volledige woord.
+        listenAfter: isYes(param("luister")),
         // Zonder "weergave=volledig" alleen de onderkant, net als bij het
         // dictee en het klik-klakboekje.
         compact: param("weergave").toLowerCase() !== "volledig",
@@ -162,6 +164,45 @@
             node.textContent = text;
         }
         return node;
+    }
+
+    /* ------------------------------------------------------------
+       Letters precies in het midden van een kaartje
+       ------------------------------------------------------------ */
+
+    // Andika heeft boven de letters veel meer ruimte dan eronder. Daardoor
+    // staan letters zonder stok (m, a, oe) optisch te laag in een kaartje.
+    // We meten waar de inkt van een tekst echt staat en schuiven hem zo
+    // dat hij precies in het midden komt. De uitkomst is in em, zodat ze
+    // klopt bij elke lettergrootte.
+    const measureContext = document.createElement("canvas").getContext("2d");
+
+    // Afstand (in em) tussen het midden van de inkt en het midden van de
+    // regel, bij line-height 1. Positief = de inkt staat te laag.
+    function inkOffset(text, weight) {
+        const size = 100;
+        try {
+            measureContext.font = `${weight} ${size}px Andika`;
+            const m = measureContext.measureText(text);
+            if (!m.fontBoundingBoxAscent || !m.actualBoundingBoxAscent) {
+                return 0;
+            }
+            const baseline = (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2;
+            const inkMiddle =
+                baseline -
+                (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+            return inkMiddle / size;
+        } catch (error) {
+            return 0;
+        }
+    }
+
+    // Zet de tekst van een kaartje in een binnenste span die verschoven
+    // kan worden, zonder dat het kader meeschuift.
+    function fillTile(tile, text) {
+        const inner = el("span", "tile-text", text);
+        tile.replaceChildren(inner);
+        return tile;
     }
 
     function icon(name, filled) {
@@ -300,7 +341,11 @@
                 button.classList.remove("is-hidden");
             } else {
                 button.remove();
-                fit();
+                // Niet opnieuw schalen tijdens de verbetering: dan staan de
+                // vakjes al op de breedte van het antwoord.
+                if (!state.result) {
+                    fit();
+                }
             }
         });
         button.addEventListener("click", () => player.toggle(button, source));
@@ -400,6 +445,7 @@
                 <tr><td><code>keuzes=</code></td><td>Kaartjes, gescheiden door komma's.
                     De juiste antwoorden worden altijd toegevoegd.</td></tr>
                 <tr><td><code>mix=ja</code></td><td>Kaartjes in willekeurige volgorde.</td></tr>
+                <tr><td><code>luister=ja</code></td><td>Na een juist antwoord verschijnt een luisterknop voor het volledige woord.</td></tr>
                 <tr><td><code>klank=ja</code></td><td>Boven elk vakje een luisterknop met de klank (of het woord) die erin moet.</td></tr>
                 <tr><td><code>weg=ja</code></td><td>Een gebruikt kaartje verdwijnt uit het keuzevak.</td></tr>
                 <tr><td><code>weergave=volledig</code></td><td>Volledige versie met instructie, afbeelding en audio. Zonder deze toevoeging: alleen de onderkant, voor Genially.</td></tr>
@@ -535,7 +581,7 @@
         const bank = el("div", "bank");
         bank.setAttribute("aria-label", "Keuzes");
         choices.forEach((choice, index) => {
-            const tile = el("button", "tile", choice);
+            const tile = fillTile(el("button", "tile"), choice);
             tile.type = "button";
             tile.dataset.choice = String(index);
             tileNodes.push(tile);
@@ -635,16 +681,53 @@
         // Steekt iets boven of onder het middenvlak uit?
         const box = stageNode.getBoundingClientRect();
         const stageTooHigh =
-            stageNode.scrollHeight > stageNode.clientHeight + 1 ||
+            stageNode.scrollHeight > stageNode.clientHeight + 4 ||
             Array.from(stageNode.children).some((child) => {
                 const r = child.getBoundingClientRect();
-                return r.top < box.top - 1 || r.bottom > box.bottom + 1;
+                return r.top < box.top - 4 || r.bottom > box.bottom + 4;
             });
         const appTooHigh = app.scrollHeight > app.clientHeight + 1;
         // Tot zes kaartjes passen bij voorkeur op één regel, zolang de
         // letters daarvoor niet te klein moeten worden.
         const keepOneRow = tileNodes.length <= 6 && fs > (isSentence ? 27 : 30);
         return rowTooWide || stageTooHigh || appTooHigh || (keepOneRow && bankWraps());
+    }
+
+    // Kaartjes in het keuzevak: elk kaartje wordt apart gecentreerd.
+    // In het woord of de zin: alle letters staan op één basislijn, en het
+    // geheel staat in het midden van de regel. Zo oogt "kat" niet scheef
+    // als de t in een vakje staat.
+    function centerTexts() {
+        const weight = isSentence ? 400 : 700;
+        tileNodes.forEach((tile) => {
+            const offset = inkOffset(tile.textContent, weight);
+            tile.firstChild.style.setProperty("--dy", `${(-offset).toFixed(3)}em`);
+        });
+
+        const rowOffset = inkOffset(fullText.replace(/\s+/g, " "), weight);
+        exerciseNode.style.setProperty("--row-dy", `${(-rowOffset).toFixed(3)}em`);
+
+        // Een kaartje in een vakje heeft een kleinere letter dan de rest
+        // van het woord. Reken de verschuiving om zodat de basislijn toch
+        // gelijk ligt met de gegeven letters.
+        const sample = tileNodes[0];
+        const bankSize = parseFloat(getComputedStyle(bankNode).fontSize) || 1;
+        const tileSize = parseFloat(getComputedStyle(sample).fontSize) || bankSize;
+        const ratio = tileSize / bankSize;
+        const baselineFromMiddle = baselineOffset(weight);
+        const inGap = (baselineFromMiddle * (1 - ratio) - rowOffset) / ratio;
+        exerciseNode.style.setProperty("--gap-dy", `${inGap.toFixed(3)}em`);
+    }
+
+    // Afstand (in em) van de basislijn tot het midden van de regel.
+    function baselineOffset(weight) {
+        try {
+            measureContext.font = `${weight} 100px Andika`;
+            const m = measureContext.measureText("x");
+            return (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 / 100 || 0;
+        } catch (error) {
+            return 0;
+        }
     }
 
     function fit() {
@@ -694,6 +777,11 @@
                 break;
             }
         }
+        // Na een juist antwoord blijven de vakjes zo breed als het antwoord,
+        // ook als het scherm draait.
+        if (state.result === "good") {
+            fitGapsToAnswers();
+        }
     }
 
     // Alle vakjes en kaartjes krijgen dezelfde hoogte. De vakjes zijn zo
@@ -722,7 +810,7 @@
         gap.classList.toggle("filled", Boolean(content));
         gap.classList.remove("good", "wrong");
         if (content) {
-            gap.appendChild(el("span", "tile", content.text));
+            gap.appendChild(fillTile(el("span", "tile"), content.text));
             gap.setAttribute("aria-label", `${content.text}, tik om weg te halen`);
             gap.tabIndex = 0;
         } else {
@@ -750,6 +838,8 @@
         }
         state.result = "";
         app.classList.remove("done");
+        player.stop();
+        releaseGapWidths();
         feedbackNode.className = "feedback";
         feedbackNode.replaceChildren();
         gapNodes.forEach((gap) => gap.classList.remove("good", "wrong"));
@@ -780,8 +870,19 @@
             gapNodes.forEach((gap) => gap.classList.add("good"));
             feedbackNode.className = "feedback good";
             feedbackNode.appendChild(icon("check"));
+            if (settings.listenAfter) {
+                const candidates = wordAudioCandidates(fullText);
+                if (candidates.length > 0) {
+                    const listen = audioButton(candidates, "Luister naar het woord");
+                    listen.classList.add("small");
+                    listen.dataset.icon = "speaker";
+                    setIcon(listen, "speaker", false);
+                    feedbackNode.appendChild(listen);
+                }
+            }
             feedbackNode.appendChild(retryButton("good"));
             app.classList.add("done");
+            fitGapsToAnswers();
             // De kaartjes die niet in het antwoord horen, verdwijnen.
             tileNodes.forEach((tile, index) => {
                 if (!answers.includes(choices[index])) {
@@ -808,6 +909,27 @@
         } catch (error) {
             /* geen omringende pagina */
         }
+    }
+
+    // In de verbetering wordt elk vakje zo breed als het juiste antwoord.
+    // Tijdens de oefening zijn alle vakjes even breed, zodat de breedte
+    // geen hint geeft over welk kaartje erin hoort.
+    function tileWidthFor(text) {
+        const tile = tileNodes.find((node) => node.textContent === text);
+        return tile ? tile.offsetWidth : 0;
+    }
+
+    function fitGapsToAnswers() {
+        gapNodes.forEach((gap, index) => {
+            const width = tileWidthFor(answers[index]);
+            if (width > 0) {
+                gap.style.width = `${width}px`;
+            }
+        });
+    }
+
+    function releaseGapWidths() {
+        gapNodes.forEach((gap) => gap.style.removeProperty("width"));
     }
 
     // Knop om de oefening helemaal opnieuw te beginnen.
@@ -860,7 +982,14 @@
     }
 
     function makeGhost(text, rect) {
-        const ghost = el("div", "tile ghost", text);
+        const ghost = fillTile(el("div", "tile ghost"), text);
+        const source = tileNodes.find((node) => node.textContent === text);
+        if (source) {
+            ghost.firstChild.style.setProperty(
+                "--dy",
+                source.firstChild.style.getPropertyValue("--dy"),
+            );
+        }
         ghost.style.width = `${rect.width}px`;
         ghost.style.height = `${rect.height}px`;
         // Zelfde lettergrootte als de kaartjes in het keuzevak.
@@ -1085,9 +1214,20 @@
 
     build();
     wireEvents();
+    centerTexts();
     fit();
     if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(fit);
+        // Laad Andika uitdrukkelijk: pas dan kloppen de metingen voor het
+        // centreren. (Zonder dit meet de browser soms een ander lettertype.)
+        const loads = ["400 40px Andika", "700 40px Andika"].map((font) =>
+            document.fonts.load(font, "abc").catch(() => null),
+        );
+        Promise.all(loads)
+            .then(() => document.fonts.ready)
+            .then(() => {
+                centerTexts();
+                fit();
+            });
     }
 
     // Voor de tests: de toestand van buitenaf kunnen bekijken.

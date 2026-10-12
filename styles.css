@@ -200,10 +200,25 @@ button {
 .app.compact {
     justify-content: center;
 }
+/* De onderkant voor Genially heeft bijna geen marge, zodat het
+   insluitveld klein kan blijven. */
 .app.compact .stage {
     flex: none;
     background: transparent;
-    padding: 8px 16px 2px;
+    gap: 4px;
+    padding: 2px 2px 0;
+}
+.app.compact .feedback {
+    height: 36px;
+}
+.app.compact .retry-btn,
+.app.compact .feedback .play-btn.small {
+    width: 34px;
+    height: 34px;
+}
+.app.compact .feedback > .icon {
+    width: 26px;
+    height: 26px;
 }
 
 /* ================================================================
@@ -251,7 +266,9 @@ button {
     place-items: center;
     touch-action: none;
     cursor: default;
-    transition: background-color 0.15s;
+    /* In de verbetering krimpt het vakje rustig tot de breedte van het
+       antwoord. */
+    transition: background-color 0.15s, width 0.25s ease;
     /* Hoekjes zoals in Genially */
     background:
         linear-gradient(var(--c), var(--c)) top left / 0.32em 3px no-repeat,
@@ -386,12 +403,13 @@ button {
 .app.compact .bank {
     border-top: 0;
     background: transparent;
-    padding-top: 6px;
+    padding: 4px 2px calc(4px + env(safe-area-inset-bottom));
 }
 .tile {
     min-width: var(--gap-h, 1.4em);
     height: var(--gap-h, 1.4em);
-    padding: 0 0.22em;
+    /* Weinig opvulling: het kaartje is net breed genoeg voor de letters. */
+    padding: 0 0.1em;
     border: 2px solid var(--teal);
     border-radius: 8px;
     background: #fff;
@@ -562,4 +580,29 @@ button {
 .sound-btn:focus-visible {
     outline: 3px solid rgba(231, 66, 122, 0.45);
     outline-offset: 3px;
+}
+
+/* Kleinere luisterknop naast het vinkje (optie luister=ja). */
+.feedback .play-btn.small {
+    width: 44px;
+    height: 44px;
+}
+.feedback .play-btn.small .icon {
+    width: 21px;
+    height: 21px;
+}
+
+/* Letters precies in het midden: app.js berekent de verschuiving per
+   kaartje (--dy) en voor het woord of de zin (--row-dy, --gap-dy). */
+.tile-text {
+    display: block;
+    line-height: 1;
+    transform: translateY(var(--dy, 0));
+}
+.exercise .text {
+    display: inline-block;
+    transform: translateY(var(--row-dy, 0));
+}
+.exercise .gap .tile-text {
+    transform: translateY(var(--gap-dy, 0));
 }

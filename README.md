@@ -66,6 +66,7 @@ over meerdere regels. Een leesteken blijft bij het woord ervoor staan.
 | `oef=ka[t]` | De oefening (verplicht). |
 | `keuzes=m,t,k` | De kaartjes, in deze volgorde. De juiste antwoorden worden altijd toegevoegd, ook als je ze vergeet. Leeg: alleen de juiste antwoorden, door elkaar. |
 | `mix=ja` | De kaartjes staan in willekeurige volgorde, elke keer anders. |
+| `luister=ja` | Na een juist antwoord verschijnt naast het vinkje een luisterknop voor het volledige woord. Bij één woord wordt de opname vanzelf gezocht (zie hieronder); bij een zin vul je **Audio woord/zin** in. Werkt in beide weergaven. |
 | `klank=ja` | Boven elk vakje staat een kleine luisterknop met de klank die erin moet (bij een zin: het woord). Werkt in beide weergaven. |
 | `weg=ja` | Een gebruikt kaartje verdwijnt uit het keuzevak. Zonder deze optie blijft het staan en kan het meerdere keren gebruikt worden (handig bij `[k]i[k]`). |
 | `weergave=volledig` | De volledige versie. Zonder deze toevoeging krijg je alleen de onderkant, voor Genially. Instructie, afbeelding en audio worden dan genegeerd. |
@@ -163,3 +164,18 @@ elk vakje een luisterknop. De tool zoekt de opname in deze volgorde:
    woordopname van het klik-klakboekje.
 
 Wordt niets gevonden, dan blijft de knop boven dat vakje weg.
+
+## Wat er gebeurt na een juist antwoord
+
+- De vakjes worden groen en krimpen tot de breedte van het juiste
+  antwoord. Tijdens de oefening zijn alle vakjes even breed, zodat de
+  breedte geen hint geeft.
+- Met **Woord beluisteren na juist antwoord? = Ja** (`luister=ja`) staat er
+  naast het vinkje een luisterknop voor het volledige woord.
+- De knop **Opnieuw** zet alles terug.
+
+## Letters in het midden
+
+De tool meet bij het laden waar de letters van elk kaartje staan en zet ze
+precies in het midden. In het woord of de zin zelf staan alle letters op
+één lijn, ook die in de vakjes. Daar hoef je niets voor te doen.
