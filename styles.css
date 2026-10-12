@@ -653,4 +653,5 @@ button {
 .tile {
     font-size: 1em;
     padding: 0 0.18em;
+	flex-wrap: nowrap;
 }
