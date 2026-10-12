@@ -392,7 +392,7 @@ button {
 .bank {
     flex: none;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-content: center;
     justify-content: center;
     gap: calc(var(--fs) * 0.22);
