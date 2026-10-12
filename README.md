@@ -66,6 +66,7 @@ over meerdere regels. Een leesteken blijft bij het woord ervoor staan.
 | `oef=ka[t]` | De oefening (verplicht). |
 | `keuzes=m,t,k` | De kaartjes, in deze volgorde. De juiste antwoorden worden altijd toegevoegd, ook als je ze vergeet. Leeg: alleen de juiste antwoorden, door elkaar. |
 | `mix=ja` | De kaartjes staan in willekeurige volgorde, elke keer anders. |
+| `woord=ja` | Tijdens de oefening een afspeelknop onder het woord of de zin. Werkt in beide weergaven. |
 | `luister=ja` | Na een juist antwoord verschijnt naast het vinkje een luisterknop voor het volledige woord. Bij één woord wordt de opname vanzelf gezocht (zie hieronder); bij een zin vul je **Audio woord/zin** in. Werkt in beide weergaven. |
 | `klank=ja` | Boven elk vakje staat een kleine luisterknop met de klank die erin moet (bij een zin: het woord). Werkt in beide weergaven. |
 | `weg=ja` | Een gebruikt kaartje verdwijnt uit het keuzevak. Zonder deze optie blijft het staan en kan het meerdere keren gebruikt worden (handig bij `[k]i[k]`). |
@@ -194,7 +195,7 @@ leesteken op het einde. Voor "Ik [drink] koffie." werkt bijvoorbeeld
 | Moment | Knop | Wanneer |
 |---|---|---|
 | Tijdens de oefening | kleine luisterknop boven elk vakje (losse klank of woord) | met `klank=ja` |
-| Tijdens de oefening | ronde afspeelknop onder het woord (hele woord of zin) | alleen in de volledige versie, en **niet** samen met `klank=ja` |
+| Tijdens de oefening | ronde afspeelknop onder het woord (hele woord of zin) | met `woord=ja` |
 | Na het nakijken | luisterknop in het rijtje met vinkje en Opnieuw | met `luister=ja` |
 
 De afspeelknop onder het woord verdwijnt zodra de oefening nagekeken is. Op

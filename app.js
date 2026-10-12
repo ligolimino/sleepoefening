@@ -69,6 +69,8 @@
         sound: isYes(param("klank")),
         // Na een juist antwoord een luisterknop voor het volledige woord.
         listenAfter: isYes(param("luister")),
+        // Tijdens de oefening een afspeelknop voor het hele woord of de zin.
+        wordDuring: isYes(param("woord")),
         // Zonder "weergave=volledig" alleen de onderkant, net als bij het
         // dictee en het klik-klakboekje.
         compact: param("weergave").toLowerCase() !== "volledig",
@@ -469,6 +471,7 @@
                 <tr><td><code>keuzes=</code></td><td>Kaartjes, gescheiden door komma's.
                     De juiste antwoorden worden altijd toegevoegd.</td></tr>
                 <tr><td><code>mix=ja</code></td><td>Kaartjes in willekeurige volgorde.</td></tr>
+                <tr><td><code>woord=ja</code></td><td>Tijdens de oefening een afspeelknop onder het woord of de zin.</td></tr>
                 <tr><td><code>luister=ja</code></td><td>Na een juist antwoord verschijnt een luisterknop voor het volledige woord.</td></tr>
                 <tr><td><code>klank=ja</code></td><td>Boven elk vakje een luisterknop met de klank (of het woord) die erin moet.</td></tr>
                 <tr><td><code>weg=ja</code></td><td>Een gebruikt kaartje verdwijnt uit het keuzevak.</td></tr>
@@ -670,17 +673,24 @@
         exerciseNode = buildExerciseRow();
         stageNode.appendChild(exerciseNode);
 
-        if (!settings.compact) {
+        // Onder de oefening staan op dezelfde plaats:
+        // - tijdens de oefening: de luisterknop voor het hele woord of de
+        //   zin, alleen met woord=ja (in beide weergaven);
+        // - na het nakijken: het rijtje met vinkje of kruisje, eventueel de
+        //   luisterknop (luister=ja) en de knop Opnieuw.
+        const below = el("div", "below");
+        if (settings.wordDuring) {
             const candidates = wordAudioCandidates(fullText);
             if (candidates.length > 0) {
                 const wrap = el("div", "word-audio");
                 wrap.appendChild(audioButton(candidates, "Luister naar het woord"));
-                stageNode.appendChild(wrap);
+                below.appendChild(wrap);
             }
         }
 
         feedbackNode = el("div", "feedback");
-        stageNode.appendChild(feedbackNode);
+        below.appendChild(feedbackNode);
+        stageNode.appendChild(below);
         children.push(stageNode);
 
         bankNode = buildBank();
@@ -865,6 +875,7 @@
         }
         state.result = "";
         app.classList.remove("done");
+        app.classList.remove("has-result");
         player.stop();
         releaseGapWidths();
         feedbackNode.className = "feedback";
@@ -891,6 +902,8 @@
         );
         const allGood = correct.every(Boolean);
         state.result = allGood ? "good" : "wrong";
+        app.classList.add("has-result");
+        player.stop();
 
         feedbackNode.replaceChildren();
         if (allGood) {
