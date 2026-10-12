@@ -647,3 +647,10 @@ button {
 .tile.ghost .tile-text {
     transform: none;
 }
+
+/* Alle kaartjes even groot als de gegeven letters, met wat meer
+   ruimte links en rechts. De vakjes passen zich vanzelf aan. */
+.tile {
+    font-size: 1em;
+    padding: 0 0.18em;
+}
