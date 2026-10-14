@@ -32,7 +32,7 @@
     /* Zachte schaduw rondom de kaartjes */
     /* Kaartjes: rustig wit met een fijn grijs kader en een zachte schaduw */
     --tile-line: #cbd8db;
-    --tile-shadow: 0 1px 2px rgba(23, 48, 66, 0.06), 0 2px 8px rgba(23, 48, 66, 0.06);
+        --tile-shadow: 0 2px 3px rgba(23, 48, 66, 0.10), 0 6px 14px rgba(23, 48, 66, 0.14);
 }
 
 /* ================================================================
@@ -237,7 +237,7 @@ button {
     justify-content: center;
     font-size: var(--fs);
     line-height: 1;
-    font-weight: 700;
+    font-weight: 400;
 }
 .exercise.sentence {
     flex-wrap: wrap;
@@ -446,7 +446,7 @@ button {
     color: var(--ink);
     font: inherit;
     font-size: 1em;
-    font-weight: 700;
+    font-weight: 400;
     line-height: 1;
     white-space: nowrap;
     box-shadow: var(--tile-shadow);
@@ -458,7 +458,7 @@ button {
     line-height: 1;
     /* Ruimte boven en onder de letters. app.js berekent de exacte waarden
        voor Andika; dit zijn de waarden als dat niet lukt. */
-    margin-top: calc(var(--tile-mt, 0.12em) + 0.06em));
+        margin-top: calc(var(--tile-mt, 0.12em) + 0.1em);
     margin-bottom: calc(var(--tile-mb, 0.12em) - 0.06em);
 }
 .bank .tile:hover {
