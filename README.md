@@ -176,12 +176,18 @@ Wordt niets gevonden, dan blijft de knop boven dat vakje weg.
   naast het vinkje een luisterknop voor het volledige woord.
 - De knop **Opnieuw** zet alles terug.
 
-## Letters in het midden
+## Lay-out
 
-De tool meet bij het laden waar de letters staan en zet ze zo goed mogelijk
-in het midden van de kaartjes. Alle kaartjes delen één basislijn, zodat de
-letters onderling op één lijn blijven. In het woord of de zin staan alle
-letters op één lijn, ook die in de vakjes. Daar hoef je niets voor te doen.
+- De letters op de kaartjes zijn even groot als de letters van het woord.
+  In de vakjes staan ze op precies dezelfde lijn als de gegeven letters.
+- Kaartjes zijn hoog genoeg voor letters met een stok of staart (b, d, p, g).
+- Alles wordt zo groot als het scherm of het insluitvak in Genially toelaat.
+- De kaartjes gaan pas over twee (of drie) gelijk verdeelde regels als de
+  letters daardoor merkbaar groter worden. Een zin gaat alleen over een
+  extra regel als dat nodig is, en nooit met één woord alleen.
+- Tip voor Genially: laat links en rechts gerust ruimte om te bladeren. Een
+  iets hoger insluitvak geeft de kaartjes ruimte om over twee regels te gaan
+  en dus groter te worden.
 
 ## Audio bij een zin
 

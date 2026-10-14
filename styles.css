@@ -30,8 +30,9 @@
     --bad-soft: #fee7ed;
     --shadow: 0 12px 34px rgba(20, 67, 79, 0.13);
     /* Zachte schaduw rondom de kaartjes */
-    --tile-shadow: 0 8px 12px rgba(20, 67, 79, 0.20);
-	
+    /* Kaartjes: rustig wit met een fijn grijs kader en een zachte schaduw */
+    --tile-line: #cbd8db;
+    --tile-shadow: 0 1px 2px rgba(23, 48, 66, 0.06), 0 2px 8px rgba(23, 48, 66, 0.06);
 }
 
 /* ================================================================
@@ -207,7 +208,7 @@ button {
     flex: none;
     background: transparent;
     gap: 4px;
-    padding: 2px 2px 0;
+    padding: 6px 6px 0;
 }
 .app.compact .feedback {
     height: 36px;
@@ -226,19 +227,21 @@ button {
    5. De oefenregel: vaste letters of woorden en de vakjes
    ================================================================ */
 
+/* Alles staat op de basislijn van de letters: zo staan de gegeven letters
+   en de letters op de kaartjes in de vakjes altijd op één lijn. */
 .exercise {
     max-width: 100%;
     display: flex;
     flex-wrap: nowrap;
-    align-items: center;
+    align-items: baseline;
     justify-content: center;
     font-size: var(--fs);
-    line-height: 1.15;
+    line-height: 1;
     font-weight: 700;
 }
 .exercise.sentence {
     flex-wrap: wrap;
-    row-gap: 0.28em;
+    row-gap: 0.32em;
     column-gap: 0.28em;
     font-weight: 400;
 }
@@ -249,49 +252,39 @@ button {
     white-space: normal;
 }
 /* Een woord en het leesteken erna blijven bij elkaar op één regel. */
-.exercise .chunk {
+.exercise .chunk,
+.gap-holder {
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
     white-space: nowrap;
+    flex: none;
 }
 
+/* Het invulvak: fijne turquoise hoekjes op een heel lichte achtergrond. */
 .gap {
-    --c: var(--teal);
+    --c: rgba(8, 127, 140, 0.75);
+    --corner: 0.26em;
+    --stroke: 2px;
     position: relative;
     flex: none;
-    width: var(--gap-w, 1.0em);
-    height: var(--gap-h, 1.0em);
-    margin: 0 0.02em;
-    border-radius: 6px;
-    display: grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: baseline;
+    width: var(--gap-w, 1.2em);
+    margin: 0 0.04em;
+    border-radius: 0.16em;
     touch-action: none;
     cursor: default;
-    /* In de verbetering krimpt het vakje rustig tot de breedte van het
-       antwoord. */
-    transition: background-color 0.15s, width 0.25s ease;
-    /* Hoekjes zoals in Genially */
+    transition: background-color 0.15s;
     background:
-        linear-gradient(var(--c), var(--c)) top left / 0.32em 3px no-repeat,
-        linear-gradient(var(--c), var(--c)) top left / 3px 0.32em no-repeat,
-        linear-gradient(var(--c), var(--c)) top right / 0.32em 3px no-repeat,
-        linear-gradient(var(--c), var(--c)) top right / 3px 0.32em no-repeat,
-        linear-gradient(var(--c), var(--c)) bottom left / 0.32em 3px no-repeat,
-        linear-gradient(var(--c), var(--c)) bottom left / 3px 0.32em no-repeat,
-        linear-gradient(var(--c), var(--c)) bottom right / 0.32em 3px no-repeat,
-        linear-gradient(var(--c), var(--c)) bottom right / 3px 0.32em no-repeat;
-}
-.gap::after {
-    /* Plusteken in een leeg vakje */
-    content: none;
-    color: var(--ink);
-    font-weight: 700;
-    font-size: 0.62em;
-    line-height: 1.15;
-}
-.gap.filled::after,
-.gap.target::after {
-    content: none;
+        linear-gradient(var(--c), var(--c)) top left / var(--corner) var(--stroke) no-repeat,
+        linear-gradient(var(--c), var(--c)) top left / var(--stroke) var(--corner) no-repeat,
+        linear-gradient(var(--c), var(--c)) top right / var(--corner) var(--stroke) no-repeat,
+        linear-gradient(var(--c), var(--c)) top right / var(--stroke) var(--corner) no-repeat,
+        linear-gradient(var(--c), var(--c)) bottom left / var(--corner) var(--stroke) no-repeat,
+        linear-gradient(var(--c), var(--c)) bottom left / var(--stroke) var(--corner) no-repeat,
+        linear-gradient(var(--c), var(--c)) bottom right / var(--corner) var(--stroke) no-repeat,
+        linear-gradient(var(--c), var(--c)) bottom right / var(--stroke) var(--corner) no-repeat,
+        rgba(8, 127, 140, 0.04);
 }
 .gap.near {
     --c: var(--pink);
@@ -299,14 +292,29 @@ button {
 }
 .gap.filled {
     cursor: pointer;
+    background: none;
 }
+/* Een kaartje in een vakje vult het vakje helemaal. */
 .gap .tile {
-    position: absolute;
-    inset: 0;
     width: 100%;
-    height: 100%;
-    min-width: 0;
     box-shadow: none;
+}
+/* Onzichtbaar kaartje in een leeg vakje: geeft hoogte en basislijn. */
+.gap .tile.spacer {
+    visibility: hidden;
+}
+/* In de verbetering krimpt het vakje rustig tot het woord dat erin staat.
+   (Alleen dan: tijdens het schalen moet de breedte meteen kloppen.) */
+.app.has-result .gap {
+    transition: background-color 0.15s, width 0.25s ease;
+}
+/* In de verbetering: zo breed als het woord dat erin staat. */
+.gap.fit {
+    width: auto;
+    transition: none;
+}
+.gap.fit .tile {
+    width: auto;
 }
 .gap.good .tile {
     border-color: var(--good);
@@ -396,47 +404,68 @@ button {
    7. Keuzevak onderaan met de sleepkaartjes
    ================================================================ */
 
+/* De kaartjes staan op één, twee of drie gelijk verdeelde regels.
+   app.js kiest het aantal regels. */
 .bank {
     flex: none;
     display: flex;
-    flex-wrap: nowrap;
-    align-content: center;
-    justify-content: center;
-    gap: calc(var(--fs) * 0.22);
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--fs) * 0.2);
     padding: 12px max(12px, env(safe-area-inset-left))
         calc(12px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);
     background: #fff;
     font-size: var(--fs);
+    line-height: 1;
+}
+.bank-row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: calc(var(--fs) * 0.2);
 }
 .app.compact .bank {
     border-top: 0;
     background: transparent;
-    padding: 4px 2px calc(4px + env(safe-area-inset-bottom));
+    padding: 4px 6px calc(6px + env(safe-area-inset-bottom));
 }
+
+/* Een kaartje: even grote letters als het woord, met een smalle rand
+   links en rechts en ruimte boven en onder voor b, d, p, g, ... */
 .tile {
-    min-width: var(--gap-h, 1.4em);
-    height: var(--gap-h, 2.1em);
-    /* Weinig opvulling: het kaartje is net breed genoeg voor de letters. */
-    padding: 0 0.1em;
-    border: 2px solid var(--teal);
-    border-radius: 4px;
+    box-sizing: border-box;
+    display: inline-flex;
+    justify-content: center;
+    align-items: baseline;
+    min-width: 1.05em;
+    padding: 0 0.2em;
+    border: 1.5px solid var(--tile-line);
+    border-radius: 0.16em;
     background: #fff;
     color: var(--ink);
-    display: grid;
-    place-items: center;
-    /* Iets kleiner dan de gegeven letters, zodat het kaartje met kader
-       niet groter oogt dan de rest van het woord. */
-    font-size: 0.9em;
-    font-weight: 500;
-    line-height: 1.15;
+    font: inherit;
+    font-size: 1em;
+    font-weight: 700;
+    line-height: 1;
     white-space: nowrap;
     box-shadow: var(--tile-shadow);
     touch-action: none;
     cursor: grab;
 }
+.tile-text {
+    display: block;
+    line-height: 1;
+    /* Ruimte boven en onder de letters. app.js berekent de exacte waarden
+       voor Andika; dit zijn de waarden als dat niet lukt. */
+    margin-top: var(--tile-mt, 0.12em);
+    margin-bottom: var(--tile-mb, 0.12em);
+}
+.bank .tile:hover {
+    border-color: var(--teal);
+}
 .sentence-mode .tile {
-    font-weight: 300;
+    font-weight: 400;
 }
 .bank .tile:focus-visible {
     outline: 3px solid rgba(231, 66, 122, 0.45);
@@ -552,20 +581,25 @@ button {
     position: relative;
     display: inline-flex;
 }
+.app {
+    /* Grootte van de klankknoppen: groeit mee met de letters, maar wordt
+       nooit breder dan een vakje, zodat twee knoppen niet overlappen. */
+    --snd: clamp(28px, min(calc(var(--fs) * 0.8), calc(var(--gap-w, 60px) - 4px)), 44px);
+}
 .exercise.with-sound {
     /* Ruimte boven de regel voor de luisterknoppen */
-    padding-top: 50px;
+    padding-top: calc(var(--snd) + 8px);
 }
 .exercise.sentence.with-sound {
-    row-gap: 54px;
+    row-gap: calc(var(--snd) + 12px);
 }
 .sound-btn {
     position: absolute;
     left: 50%;
     bottom: calc(100% + 6px);
     transform: translateX(-50%);
-    width: 40px;
-    height: 40px;
+    width: var(--snd);
+    height: var(--snd);
     border: 0;
     border-radius: 50%;
     background: var(--teal);
@@ -577,8 +611,8 @@ button {
     box-shadow: var(--tile-shadow);
 }
 .sound-btn .icon {
-    width: 22px;
-    height: 22px;
+    width: calc(var(--snd) * 0.52);
+    height: calc(var(--snd) * 0.52);
 }
 .sound-btn.is-playing {
     background: var(--ink);
@@ -601,22 +635,6 @@ button {
     height: 21px;
 }
 
-/* Letters precies in het midden: app.js berekent de verschuiving per
-   kaartje (--dy) en voor het woord of de zin (--row-dy, --gap-dy). */
-.tile-text {
-    display: block;
-    line-height: 1;
-    transform: translateY(var(--dy, 0.8));
-}
-.exercise .text {
-    display: inline-block;
-    transform: translateY(var(--row-dy, 0));
-}
-.exercise .gap .tile-text {
-    transform: translateY(var(--gap-dy, 0));
-}
-
-
 /* Luisterknop voor het woord en het nakijkrijtje delen één plaats onder de
    oefening. Na het nakijken verdwijnt de luisterknop, zonder dat de
    oefening verspringt. */
@@ -636,57 +654,7 @@ button {
     width: 34px;
 }
 
-/* Ingevulde letters exact op één lijn met de gegeven letters:
-   zelfde lettergrootte en geen verschuiving. */
-.exercise .text {
-    transform: none;
-}
-.exercise .gap .tile {
-    font-size: 1em;
-}
-.exercise .gap .tile-text {
-    transform: none;
-}
-
-/* Letters in het keuzevak (en tijdens het slepen) niet verschuiven:
-   zelfde uitlijning als in de verbetering. */
-.bank .tile-text,
-.tile.ghost .tile-text {
-    transform: none;
-}
-
-/* Alle kaartjes even groot als de gegeven letters, met wat meer
-   ruimte links en rechts. De vakjes passen zich vanzelf aan. */
-.tile {
-    font-size: 0.8em;
-    padding: 0 0.18em;
-}
-
+/* In de verbetering verdwijnen de klankknoppen boven de vakjes. */
 .app.has-result .sound-btn {
     visibility: hidden;
-}
-
-/* Forceer dat onderdelen van de oefening niet overlappen */
-.exercise .chunk,
-.exercise .text,
-.gap-holder,
-.gap {
-    flex-shrink: 0 !important;
-}
-
-
-.gap .tile {
-    padding: 0;
-    overflow: hidden;
-    font-size: 0.8em;
-}
-
-.gap .tile-text {
-    display: block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: clip;
-    white-space: nowrap;
-    font-size: 0.8em;
-    line-height: 1;
 }

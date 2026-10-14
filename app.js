@@ -169,38 +169,14 @@
     }
 
     /* ------------------------------------------------------------
-       Letters precies in het midden van een kaartje
+       Kaartjes
        ------------------------------------------------------------ */
 
-    // Andika heeft boven de letters veel meer ruimte dan eronder. Daardoor
-    // staan letters zonder stok (m, a, oe) optisch te laag in een kaartje.
-    // We meten waar de inkt van een tekst echt staat en schuiven hem zo
-    // dat hij precies in het midden komt. De uitkomst is in em, zodat ze
-    // klopt bij elke lettergrootte.
+    // Meetinstrument voor de afmetingen van het lettertype Andika.
     const measureContext = document.createElement("canvas").getContext("2d");
 
-    // Afstand (in em) tussen het midden van de inkt en het midden van de
-    // regel, bij line-height 1. Positief = de inkt staat te laag.
-    function inkOffset(text, weight) {
-        const size = 100;
-        try {
-            measureContext.font = `${weight} ${size}px Andika`;
-            const m = measureContext.measureText(text);
-            if (!m.fontBoundingBoxAscent || !m.actualBoundingBoxAscent) {
-                return 0;
-            }
-            const baseline = (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2;
-            const inkMiddle =
-                baseline -
-                (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
-            return inkMiddle / size;
-        } catch (error) {
-            return 0;
-        }
-    }
-
-    // Zet de tekst van een kaartje in een binnenste span die verschoven
-    // kan worden, zonder dat het kader meeschuift.
+    // Zet de tekst van een kaartje in een binnenste span. Die bepaalt de
+    // ruimte boven en onder de letters.
     function fillTile(tile, text) {
         const inner = el("span", "tile-text", text);
         tile.replaceChildren(inner);
@@ -703,117 +679,227 @@
        Automatische maat: alles past op het scherm, zonder scrollen
        ------------------------------------------------------------ */
 
-    // Staan de kaartjes over meer dan één regel verspreid?
-    function bankWraps() {
-        const first = tileNodes[0];
-        const last = tileNodes[tileNodes.length - 1];
-        return last.offsetTop > first.offsetTop + first.offsetHeight / 2;
+    // Op hoeveel regels staat de zin nu?
+    // (Een woord met een vakje is hoger dan een gewoon woord. Daarom tellen
+    // we een nieuwe regel pas als een woord volledig onder de vorige staat.)
+    function exerciseLines() {
+        let lines = 0;
+        let lineBottom = -Infinity;
+        exerciseNode.querySelectorAll(":scope > .chunk").forEach((chunk) => {
+            const top = chunk.offsetTop;
+            const bottom = top + chunk.offsetHeight;
+            if (top >= lineBottom - 2) {
+                lines += 1;
+                lineBottom = bottom;
+            } else {
+                lineBottom = Math.max(lineBottom, bottom);
+            }
+        });
+        return Math.max(1, lines);
     }
 
-    function overflowing(fs) {
+    // Een zin mag niet over meer regels gaan dan echt nodig is, alleen
+    // om de letters groter te maken.
+    let allowedLines = 1;
+
+    function overflowing() {
+        if (isSentence && exerciseLines() > allowedLines) {
+            return true;
+        }
         const rowTooWide = exerciseNode.scrollWidth > exerciseNode.clientWidth + 1;
+        const bankTooWide = bankNode.scrollWidth > bankNode.clientWidth + 1;
         // Steekt iets boven of onder het middenvlak uit?
         const box = stageNode.getBoundingClientRect();
         const stageTooHigh =
-            stageNode.scrollHeight > stageNode.clientHeight + 4 ||
+            stageNode.scrollHeight > stageNode.clientHeight + 2 ||
             Array.from(stageNode.children).some((child) => {
                 const r = child.getBoundingClientRect();
-                return r.top < box.top - 4 || r.bottom > box.bottom + 4;
+                return r.top < box.top - 2 || r.bottom > box.bottom + 2;
             });
         const appTooHigh = app.scrollHeight > app.clientHeight + 1;
-        // Tot zes kaartjes passen bij voorkeur op één regel, zolang de
-        // letters daarvoor niet te klein moeten worden.
-        const keepOneRow = tileNodes.length <= 6 && fs > (isSentence ? 27 : 30);
-        return rowTooWide || stageTooHigh || appTooHigh || (keepOneRow && bankWraps());
+        return rowTooWide || bankTooWide || stageTooHigh || appTooHigh;
     }
 
-    // Kaartjes in het keuzevak: elk kaartje wordt apart gecentreerd.
-    // In het woord of de zin: alle letters staan op één basislijn, en het
-    // geheel staat in het midden van de regel. Zo oogt "kat" niet scheef
-    // als de t in een vakje staat.
-    function centerTexts() {
+    // Hoe hoog wordt een kaartje, en waar staan de letters erin?
+    // We meten in Andika hoe hoog de hoogste letter (b, d, h, k, l, t) en
+    // hoe diep de diepste staart (g, j, p, q, y) komt. Het kaartje krijgt
+    // boven en onder evenveel ruimte. Omdat alle kaartjes dezelfde
+    // waarden krijgen, staan alle letters op één lijn, ook die in de
+    // vakjes naast de gegeven letters.
+    const TILE_MARGIN_EM = 0.13;
+
+    function measureTiles() {
         const weight = isSentence ? 400 : 700;
-        // Alle kaartjes krijgen dezelfde verschuiving, zodat de letters
-        // onderling op één basislijn blijven staan. De verschuiving zet de
-        // letters van alle kaartjes samen zo goed mogelijk in het midden.
-        const bankOffset = inkOffset(choices.join(""), weight);
-        tileNodes.forEach((tile) => {
-            tile.firstChild.style.setProperty("--dy", `${(-bankOffset).toFixed(3)}em`);
-        });
-
-        const rowOffset = inkOffset(fullText.replace(/\s+/g, " "), weight);
-        exerciseNode.style.setProperty("--row-dy", `${(-rowOffset).toFixed(3)}em`);
-
-        // Een kaartje in een vakje heeft een kleinere letter dan de rest
-        // van het woord. Reken de verschuiving om zodat de basislijn toch
-        // gelijk ligt met de gegeven letters.
-        const sample = tileNodes[0];
-        const bankSize = parseFloat(getComputedStyle(bankNode).fontSize) || 1;
-        const tileSize = parseFloat(getComputedStyle(sample).fontSize) || bankSize;
-        const ratio = tileSize / bankSize;
-        const baselineFromMiddle = baselineOffset(weight);
-        const inGap = (baselineFromMiddle * (1 - ratio) - rowOffset) / ratio;
-        exerciseNode.style.setProperty("--gap-dy", `${inGap.toFixed(3)}em`);
-    }
-
-    // Afstand (in em) van de basislijn tot het midden van de regel.
-    function baselineOffset(weight) {
         try {
             measureContext.font = `${weight} 100px Andika`;
-            const m = measureContext.measureText("x");
-            return (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 / 100 || 0;
+            const box = measureContext.measureText("x");
+            const ascent = box.fontBoundingBoxAscent / 100;
+            const descent = box.fontBoundingBoxDescent / 100;
+            const tallest =
+                measureContext.measureText("bdfhklt").actualBoundingBoxAscent / 100;
+            const deepest =
+                measureContext.measureText("gjpqy").actualBoundingBoxDescent / 100;
+            if (!ascent || !tallest) {
+                return;
+            }
+            // Bij line-height 1 ligt de basislijn hier, gemeten vanaf de
+            // bovenkant van de regel.
+            const baseline = ascent - (ascent + descent - 1) / 2;
+            const inkTop = baseline - tallest;
+            const inkBottom = baseline + deepest;
+            const top = TILE_MARGIN_EM - inkTop;
+            const bottom = TILE_MARGIN_EM - (1 - inkBottom);
+            app.style.setProperty("--tile-mt", `${top.toFixed(3)}em`);
+            app.style.setProperty("--tile-mb", `${bottom.toFixed(3)}em`);
         } catch (error) {
-            return 0;
+            /* dan gelden de standaardwaarden uit styles.css */
         }
     }
 
+    // Verdeelt de kaartjes gelijk over een aantal regels: 8 kaartjes over
+    // 2 regels geeft 4 + 4, 7 kaartjes geeft 4 + 3.
+    let bankRows = 0;
+
+    function layoutBank(rows) {
+        if (rows === bankRows) {
+            return;
+        }
+        bankRows = rows;
+        const total = tileNodes.length;
+        const base = Math.floor(total / rows);
+        const extra = total % rows;
+        const rowNodes = [];
+        let index = 0;
+        for (let r = 0; r < rows; r += 1) {
+            const row = el("div", "bank-row");
+            const count = base + (r < extra ? 1 : 0);
+            for (let i = 0; i < count; i += 1) {
+                row.appendChild(tileNodes[index]);
+                index += 1;
+            }
+            rowNodes.push(row);
+        }
+        bankNode.replaceChildren(...rowNodes);
+    }
+
+    // Maakt alles zo groot als het scherm (of het insluitvak in Genially)
+    // toelaat. De kaartjes gaan pas over twee of drie regels als de
+    // letters daardoor merkbaar groter kunnen worden.
     function fit() {
         if (!exerciseNode) {
             return;
         }
         const width = app.clientWidth || window.innerWidth;
         const height = app.clientHeight || window.innerHeight;
-        const longest = Math.max(...choices.map((c) => c.length), 1);
 
-        // Startgrootte: groot voor letters, kleiner voor zinnen.
-        let fs = isSentence
-            ? Math.min(width * 0.08, height * 0.2, 46)
-            : Math.min(width * 0.16, height * 0.24, 84);
-        if (longest > 3 && !isSentence) {
-            fs = Math.min(fs, (width * 0.5) / longest);
-        }
         // Op een breed, laag scherm staat de afbeelding naast de oefening.
         const wide = Boolean(pictureNode) && width > height * 1.25;
         app.classList.toggle("wide", wide);
-        let imgH = settings.compact ? 0 : wide ? 62 : 36;
-        const minFs = 16;
+        releaseGapWidths();
 
-        for (let step = 0; step < 40; step += 1) {
+        const minFs = 14;
+        const imageSizeSteps = (isWide) =>
+            pictureNode && !isWide ? [36, 30, 24, 18, 12] : [0];
+        const imageSizesFirst = () => imageSizeSteps(wide)[0];
+        const maxFs = isSentence
+            ? Math.min(96, height * 0.16)
+            : Math.min(150, height * 0.3);
+
+        const apply = (fs, imgH) => {
             app.style.setProperty("--fs", `${fs.toFixed(1)}px`);
             if (wide) {
-                // Naast de oefening mag de afbeelding de volle hoogte nemen.
                 app.style.setProperty("--img-h", "1px");
                 const room = stageNode.clientHeight - 24;
                 app.style.setProperty("--img-h", `${Math.max(60, room)}px`);
             } else {
-                app.style.setProperty("--img-h", `${imgH.toFixed(1)}svh`);
+                app.style.setProperty("--img-h", `${imgH}svh`);
             }
             sizeGaps();
-            if (!overflowing(fs)) {
-                break;
+        };
+
+        // Grootste lettergrootte die past, bij een vast aantal regels.
+        const largest = (rows, imgH) => {
+            layoutBank(rows);
+            let low = minFs;
+            let high = Math.max(minFs, maxFs);
+            apply(high, imgH);
+            if (!overflowing()) {
+                return high;
             }
-            // Eerst de afbeelding wat kleiner, daarna de letters.
-            if (pictureNode && !wide && imgH > 20) {
-                imgH *= 0.9;
-            } else if (fs > minFs) {
-                fs = Math.max(minFs, fs * 0.93);
-                if (pictureNode && !wide && imgH > 12) {
-                    imgH *= 0.95;
+            for (let step = 0; step < 10; step += 1) {
+                const middle = (low + high) / 2;
+                apply(middle, imgH);
+                if (overflowing()) {
+                    high = middle;
+                } else {
+                    low = middle;
                 }
-            } else {
-                break;
             }
+            return low;
+        };
+
+        // De afbeelding krimpt pas als de letters anders te klein worden.
+        const imageSizes = imageSizeSteps(wide);
+
+        // Beste verdeling voor een vast aantal regels van de zin.
+        const bestLayout = () => {
+            let found = null;
+            for (const imgH of imageSizes) {
+                const total = tileNodes.length;
+                let rows = 1;
+                let fs = largest(1, imgH);
+                if (total >= 4) {
+                    const two = largest(2, imgH);
+                    if (two > fs * 1.2) {
+                        rows = 2;
+                        fs = two;
+                    }
+                }
+                if (total >= 9 && rows === 2) {
+                    const three = largest(3, imgH);
+                    if (three > fs * 1.2) {
+                        rows = 3;
+                        fs = three;
+                    }
+                }
+                found = { rows, fs, imgH };
+                if (fs >= (isSentence ? 22 : 30)) {
+                    break;
+                }
+            }
+            return found;
+        };
+
+        let best;
+        if (!isSentence) {
+            best = bestLayout();
+        } else {
+            // Een zin gaat alleen over een extra regel als de letters
+            // daardoor merkbaar groter worden, en er staan gemiddeld minstens
+            // twee woorden op een regel (nooit één woord alleen).
+            const words = exerciseNode.querySelectorAll(":scope > .chunk").length;
+            const maxLines = Math.max(1, Math.floor(words / 2));
+            allowedLines = 99;
+            layoutBank(1);
+            apply(minFs, imageSizes[0]);
+            let lines = Math.min(exerciseLines(), maxLines);
+            allowedLines = lines;
+            best = { ...bestLayout(), lines };
+            while (lines < maxLines) {
+                allowedLines = lines + 1;
+                const next = bestLayout();
+                if (next.fs > best.fs * 1.25) {
+                    lines += 1;
+                    best = { ...next, lines };
+                } else {
+                    break;
+                }
+            }
+            allowedLines = best.lines;
         }
+        layoutBank(best.rows);
+        apply(best.fs, best.imgH);
+
         // Na een juist antwoord blijven de vakjes zo breed als het antwoord,
         // ook als het scherm draait.
         if (state.result === "good") {
@@ -821,11 +907,9 @@
         }
     }
 
-    // Alle vakjes en kaartjes krijgen dezelfde hoogte. De vakjes zijn zo
-    // breed als het breedste kaartje, zodat elk kaartje erin past.
+    // Tijdens de oefening zijn alle vakjes even breed als het breedste
+    // kaartje, zodat elk kaartje erin past en de breedte geen hint geeft.
     function sizeGaps() {
-        const height = "1.32em";
-        app.style.setProperty("--gap-h", height);
         app.style.removeProperty("--gap-w");
         let widest = 0;
         tileNodes.forEach((tile) => {
@@ -851,6 +935,11 @@
             gap.setAttribute("aria-label", `${content.text}, tik om weg te halen`);
             gap.tabIndex = 0;
         } else {
+            // Onzichtbaar kaartje: zo is een leeg vakje even hoog als een
+            // kaartje en staat het op dezelfde lijn als de letters.
+            const spacer = fillTile(el("span", "tile spacer"), "x");
+            spacer.setAttribute("aria-hidden", "true");
+            gap.appendChild(spacer);
             gap.setAttribute("aria-label", "Leeg vakje");
             gap.tabIndex = -1;
         }
@@ -949,20 +1038,18 @@
         }
     }
 
-    // In de verbetering wordt elk vakje zo breed als het juiste antwoord.
-    // Tijdens de oefening zijn alle vakjes even breed, zodat de breedte
-    // geen hint geeft over welk kaartje erin hoort.
-    function tileWidthFor(text) {
-        const tile = tileNodes.find((node) => node.textContent === text);
-        return tile ? tile.offsetWidth : 0;
-    }
-
+    // In de verbetering wordt elk vakje zo breed als het woord dat erin
+    // staat. We meten het kaartje in het vakje zelf, zodat het altijd past.
     function fitGapsToAnswers() {
-        gapNodes.forEach((gap, index) => {
-            const width = tileWidthFor(answers[index]);
-            if (width > 0) {
-                gap.style.width = `${width}px`;
-            }
+        gapNodes.forEach((gap) => {
+            const from = gap.offsetWidth;
+            gap.classList.add("fit");
+            const to = gap.offsetWidth;
+            gap.classList.remove("fit");
+            gap.style.width = `${from}px`;
+            // Even wachten zodat de browser het rustig laat krimpen.
+            gap.getBoundingClientRect();
+            gap.style.width = `${to}px`;
         });
     }
 
@@ -1021,13 +1108,6 @@
 
     function makeGhost(text, rect) {
         const ghost = fillTile(el("div", "tile ghost"), text);
-        const source = tileNodes.find((node) => node.textContent === text);
-        if (source) {
-            ghost.firstChild.style.setProperty(
-                "--dy",
-                source.firstChild.style.getPropertyValue("--dy"),
-            );
-        }
         ghost.style.width = `${rect.width}px`;
         ghost.style.height = `${rect.height}px`;
         // Zelfde lettergrootte als de kaartjes in het keuzevak.
@@ -1251,8 +1331,9 @@
        ------------------------------------------------------------ */
 
     build();
+    gapNodes.forEach((gap, index) => renderGap(index));
     wireEvents();
-    centerTexts();
+    measureTiles();
     fit();
     if (document.fonts && document.fonts.ready) {
         // Laad Andika uitdrukkelijk: pas dan kloppen de metingen voor het
@@ -1263,7 +1344,7 @@
         Promise.all(loads)
             .then(() => document.fonts.ready)
             .then(() => {
-                centerTexts();
+                measureTiles();
                 fit();
             });
     }
