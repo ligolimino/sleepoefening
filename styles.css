@@ -32,7 +32,7 @@
     /* Zachte schaduw rondom de kaartjes */
     /* Kaartjes: rustig wit met een fijn grijs kader en een zachte schaduw */
     --tile-line: #cbd8db;
-        --tile-shadow: 0 2px 3px rgba(23, 48, 66, 0.10), 0 6px 14px rgba(23, 48, 66, 0.14);
+    --tile-shadow: 0 2px 3px rgba(23, 48, 66, 0.10), 0 6px 14px rgba(23, 48, 66, 0.14);
 }
 
 /* ================================================================
