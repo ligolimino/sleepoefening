@@ -458,8 +458,8 @@ button {
     line-height: 1;
     /* Ruimte boven en onder de letters. app.js berekent de exacte waarden
        voor Andika; dit zijn de waarden als dat niet lukt. */
-    margin-top: calc(var(--tile-mt, 0.12em) + 0.06em);
-    margin-bottom: calc(var(--tile-mb, 0.12em) - 0.06em;
+    margin-top: calc(var(--tile-mt, 0.12em) + 0.06em));
+    margin-bottom: calc(var(--tile-mb, 0.12em) - 0.06em);
 }
 .bank .tile:hover {
     border-color: var(--teal);
