@@ -658,3 +658,19 @@ button {
 .app.has-result .sound-btn {
     visibility: hidden;
 }
+
+/* Opnieuw-knop onder het vinkje of kruisje */
+.feedback {
+    flex-direction: column;
+    height: auto;
+    min-height: 84px;
+    gap: 6px;
+}
+.app.compact .feedback {
+    height: auto;
+    min-height: 66px;
+    gap: 4px;
+}
+.feedback > .icon {
+    height: 28px;
+}
