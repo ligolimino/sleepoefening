@@ -729,7 +729,7 @@
     const TILE_MARGIN_EM = 0.13;
 
     function measureTiles() {
-        const weight = isSentence ? 400;
+        const weight = 400;
         try {
             measureContext.font = `${weight} 100px Andika`;
             const box = measureContext.measureText("x");
