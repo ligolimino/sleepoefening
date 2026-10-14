@@ -658,3 +658,9 @@ button {
 .app.has-result .sound-btn {
     visibility: hidden;
 }
+
+
+/* Meer ruimte tussen het woord en het vinkje/kruisje met Opnieuw */
+.feedback {
+  margin-top: 10px;
+}
