@@ -1041,6 +1041,7 @@
     // In de verbetering wordt elk vakje zo breed als het woord dat erin
     // staat. We meten het kaartje in het vakje zelf, zodat het altijd past.
     function fitGapsToAnswers() {
+        return; // vakjes niet smaller maken in de verbetering
         gapNodes.forEach((gap) => {
             const from = gap.offsetWidth;
             gap.classList.add("fit");
