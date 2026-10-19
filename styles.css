@@ -28,6 +28,7 @@
     --good-soft: #e3f4ec;
     --bad: #c53b56;
     --bad-soft: #fee7ed;
+    --ligo-light-blue: #09b9bb;
     --shadow: 0 12px 34px rgba(20, 67, 79, 0.13);
     /* Zachte schaduw rondom de kaartjes */
     /* Kaartjes: rustig wit met een fijn grijs kader en een zachte schaduw */
@@ -287,7 +288,7 @@ button {
         rgba(8, 127, 140, 0.04);
 }
 .gap.near {
-    --c: var(--pink);
+    --c: var(--ligo-light-blue);
     background-color: rgba(231, 66, 122, 0.08);
 }
 .gap.filled {
