@@ -71,9 +71,9 @@ over meerdere regels. Een leesteken blijft bij het woord ervoor staan.
 | `klank=ja` | Boven elk vakje staat een kleine luisterknop met de klank die erin moet (bij een zin: het woord). Werkt in beide weergaven. |
 | `weg=ja` | Een gebruikt kaartje verdwijnt uit het keuzevak. Zonder deze optie blijft het staan en kan het meerdere keren gebruikt worden (handig bij `[k]i[k]`). |
 | `weergave=volledig` | De volledige versie. Zonder deze toevoeging krijg je alleen de onderkant, voor Genially. Instructie, afbeelding en audio worden dan genegeerd. |
-| `instructie=sleep` | Instructie-audio uit `assets/audio/instructies/`. |
+| `instructie=sleep` | Instructie-audio uit de repository **audio** (`instructies/`), anders uit `assets/audio/instructies/`. |
 | `beeld=kat` | Afbeelding uit `assets/afbeeldingen/`. |
-| `audio=kat` | Audio van het woord of de zin uit `assets/audio/oefeningen/`. |
+| `audio=kat` | Audio van het woord of de zin uit de repository **audio** (`zinnen/` of de woordmappen), anders uit `assets/audio/oefeningen/`. |
 | `audio=geen` | Geen afspeelknop bij het woord. |
 
 ## Afbeeldingen en audio
@@ -207,3 +207,12 @@ leesteken op het einde. Voor "Ik [drink] koffie." werkt bijvoorbeeld
 De afspeelknop onder het woord verdwijnt zodra de oefening nagekeken is. Op
 die plaats verschijnt dan het rijtje met het vinkje (of kruisje), eventueel
 de luisterknop, en de knop Opnieuw, mooi gecentreerd onder de oplossing.
+
+## Opnames staan centraal
+
+Sinds oktober 2026 staan alle opnames in één repository: **ligolimino/audio**
+(`klanken/`, `woorden/<eerste letter>/`, `woorden/nonsens/`, `instructies/`,
+`zinnen/`). Deze tool zoekt daar eerst. De oude mappen in deze repository
+blijven als tweede kans bestaan, zodat oudere links altijd blijven werken.
+Nieuwe opnames voeg je toe met de createpagina of rechtstreeks in de
+audio-repository.

@@ -23,6 +23,23 @@
     const INSTRUCTION_FOLDER = "assets/audio/instructies/";
     const EXERCISE_AUDIO_FOLDER = "assets/audio/oefeningen/";
 
+    // Alle opnames staan centraal in de repository 'audio'
+    // (ligolimino.github.io/audio/). De mappen hierboven en die van het
+    // klik-klakboekje blijven als tweede kans bestaan, zodat oudere links
+    // altijd blijven werken.
+    const CENTRAL_AUDIO = "../audio/";
+    const INSTRUCTION_FOLDERS = [`${CENTRAL_AUDIO}instructies/`, INSTRUCTION_FOLDER];
+    const SENTENCE_FOLDERS = [`${CENTRAL_AUDIO}zinnen/`, EXERCISE_AUDIO_FOLDER];
+    const CENTRAL_WORD_AUDIO = `${CENTRAL_AUDIO}woorden/`;
+    const CENTRAL_SOUNDS = `${CENTRAL_AUDIO}klanken/`;
+
+    // Namen die Windows niet toelaat als bestandsnaam. De opname van
+    // bv. het woord 'nul' heet daarom 'nul_.mp3'.
+    const RESERVED_NAMES = ["con", "prn", "aux", "nul"];
+    function audioFileName(word) {
+        return RESERVED_NAMES.includes(word) ? `${word}_` : word;
+    }
+
     // Woordopnames van het klik-klakboekje. Omdat beide tools op
     // ligolimino.github.io staan, kan de sleepoefening ze gewoon
     // gebruiken zonder ze te kopiëren.
@@ -207,6 +224,8 @@
 
     // Zet een bestandsnaam of link uit Excel om naar een lijst met
     // adressen om na elkaar te proberen.
+    // 'folder' mag ook een lijst van mappen zijn: die worden in volgorde
+    // geprobeerd.
     function mediaCandidates(value, folder, extensions) {
         if (!value) {
             return [];
@@ -215,11 +234,29 @@
         if (isLink) {
             return [value];
         }
+        const folders = [].concat(folder);
         const hasExtension = /\.[a-z0-9]{2,4}$/i.test(value);
         if (hasExtension) {
-            return [folder + encodePath(value)];
+            return folders.map((place) => place + encodePath(value));
         }
-        return extensions.map((ext) => folder + encodePath(value + ext));
+        return folders.flatMap((place) =>
+            extensions.map((ext) => place + encodePath(value + ext)),
+        );
+    }
+
+    // Alle plaatsen waar de opname van één woord kan staan: eerst de
+    // centrale audio-repository, dan de eigen map, dan het klik-klakboekje.
+    function wordFileCandidates(word) {
+        const lower = word.toLowerCase();
+        const file = encodeURIComponent(audioFileName(lower)) + ".mp3";
+        const first = encodeURIComponent(lower.charAt(0));
+        return [
+            `${CENTRAL_WORD_AUDIO}${first}/${file}`,
+            `${CENTRAL_WORD_AUDIO}nonsens/${file}`,
+            EXERCISE_AUDIO_FOLDER + file,
+            `${KLIKKLAK_WORD_AUDIO}${first}/${file}`,
+            `${KLIKKLAK_WORD_AUDIO}nonsens/${file}`,
+        ];
     }
 
     /* ------------------------------------------------------------
@@ -345,11 +382,16 @@
             return [];
         }
         if (settings.audio) {
-            return mediaCandidates(
+            const named = mediaCandidates(
                 settings.audio,
-                EXERCISE_AUDIO_FOLDER,
+                SENTENCE_FOLDERS,
                 AUDIO_EXTENSIONS,
             );
+            // Een gewone naam (bv. audio=kat) kan ook een woordopname zijn.
+            const plainWord = /^[a-zà-ÿ]+$/i.test(settings.audio)
+                ? wordFileCandidates(settings.audio)
+                : [];
+            return [...named, ...plainWord];
         }
         // Geen audio opgegeven: bij één woord zoeken we zelf een opname,
         // eerst in deze repository en daarna bij het klik-klakboekje.
@@ -359,25 +401,22 @@
         }
         if (/\s/.test(word)) {
             // Een zin: zoek een opname met de zin zelf als naam, zonder
-            // leestekens op het einde. Bv. "de koffie" vindt
-            // "de koffie.mp3" of "de-koffie.mp3" in assets/audio/oefeningen/.
+            // leestekens op het einde. Bv. "de koffie" vindt "de-koffie.mp3"
+            // (zo bewaart de createpagina ze), "de koffie.mp3" of
+            // "de_koffie.mp3" in audio/zinnen/ of assets/audio/oefeningen/.
             const sentence = fullText.trim().replace(/[.?!,;:]+$/, "");
+            const plain = sentence.toLowerCase().replace(/[^a-z0-9à-ÿ\s-]/g, "").trim();
             const names = [
+                plain.replace(/\s+/g, "-"),
                 sentence,
                 sentence.toLowerCase(),
-                sentence.toLowerCase().replace(/[^a-z0-9à-ÿ\s-]/g, "").replace(/\s+/g, "-"),
+                plain.replace(/\s+/g, "_"),
             ];
-            return [...new Set(names)].map(
-                (name) => EXERCISE_AUDIO_FOLDER + encodePath(name + ".mp3"),
+            return SENTENCE_FOLDERS.flatMap((folder) =>
+                [...new Set(names)].map((name) => folder + encodePath(name + ".mp3")),
             );
         }
-        const file = encodeURIComponent(word) + ".mp3";
-        const first = encodeURIComponent(word.charAt(0));
-        return [
-            EXERCISE_AUDIO_FOLDER + file,
-            `${KLIKKLAK_WORD_AUDIO}${first}/${file}`,
-            `${KLIKKLAK_WORD_AUDIO}nonsens/${file}`,
-        ];
+        return wordFileCandidates(word);
     }
 
     // Wat moet de luisterknop boven een vakje laten horen? Bij letters en
@@ -387,13 +426,11 @@
         const value = answer.trim().toLowerCase();
         const soundName = value === "ij" || value === "ei" ? "ij-ei" : value;
         const soundFile = encodeURIComponent(soundName) + ".mp3";
-        const wordFile = encodeURIComponent(value) + ".mp3";
-        const first = encodeURIComponent(value.charAt(0));
         return [
             SOUND_FOLDER + soundFile,
+            CENTRAL_SOUNDS + soundFile,
             KLIKKLAK_SOUNDS + soundFile,
-            EXERCISE_AUDIO_FOLDER + wordFile,
-            `${KLIKKLAK_WORD_AUDIO}${first}/${wordFile}`,
+            ...wordFileCandidates(value),
         ];
     }
 
@@ -629,7 +666,7 @@
         if (!settings.compact) {
             const instruction = mediaCandidates(
                 settings.instruction,
-                INSTRUCTION_FOLDER,
+                INSTRUCTION_FOLDERS,
                 AUDIO_EXTENSIONS,
             );
             if (instruction.length > 0) {
