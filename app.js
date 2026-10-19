@@ -20,14 +20,16 @@
 
     // Mappen in deze repository voor eigen bestanden.
     const IMAGE_FOLDER = "assets/afbeeldingen/";
+    // Eerst de centrale afbeeldingen, daarna die van deze repository.
+    const IMAGE_FOLDERS = ["../assets/afbeeldingen/", IMAGE_FOLDER];
     const INSTRUCTION_FOLDER = "assets/audio/instructies/";
     const EXERCISE_AUDIO_FOLDER = "assets/audio/oefeningen/";
 
-    // Alle opnames staan centraal in de repository 'audio'
-    // (ligolimino.github.io/audio/). De mappen hierboven en die van het
+    // Alle opnames en afbeeldingen staan centraal in de repository
+    // 'assets' (ligolimino.github.io/assets/). De mappen hierboven en die van het
     // klik-klakboekje blijven als tweede kans bestaan, zodat oudere links
     // altijd blijven werken.
-    const CENTRAL_AUDIO = "../audio/";
+    const CENTRAL_AUDIO = "../assets/audio/";
     const INSTRUCTION_FOLDERS = [`${CENTRAL_AUDIO}instructies/`, INSTRUCTION_FOLDER];
     const SENTENCE_FOLDERS = [`${CENTRAL_AUDIO}zinnen/`, EXERCISE_AUDIO_FOLDER];
     const CENTRAL_WORD_AUDIO = `${CENTRAL_AUDIO}woorden/`;
@@ -52,7 +54,7 @@
     const KLIKKLAK_SOUNDS = "../klikklak/assets/audio/klanken/";
 
     // Bestandstypes die geprobeerd worden als je geen extensie typt.
-    const IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".jpeg"];
+    const IMAGE_EXTENSIONS = [".webp", ".jpg", ".png", ".jpeg"];
     const AUDIO_EXTENSIONS = [".mp3", ".m4a", ".wav"];
 
     // Hoe ver (in pixels) naast een vakje een kaartje nog vastklikt.
@@ -633,7 +635,7 @@
     function buildPicture() {
         const candidates = mediaCandidates(
             settings.image,
-            IMAGE_FOLDER,
+            IMAGE_FOLDERS,
             IMAGE_EXTENSIONS,
         );
         if (candidates.length === 0) {
