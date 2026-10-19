@@ -263,7 +263,7 @@ button {
 
 /* Het invulvak: fijne turquoise hoekjes op een heel lichte achtergrond. */
 .gap {
-    --c: rgba(8, 127, 140, 0.75);
+    --c: rgb(206, 225, 221);
     --corner: 0.26em;
     --stroke: 2px;
     position: relative;
@@ -285,7 +285,7 @@ button {
         linear-gradient(var(--c), var(--c)) bottom left / var(--stroke) var(--corner) no-repeat,
         linear-gradient(var(--c), var(--c)) bottom right / var(--corner) var(--stroke) no-repeat,
         linear-gradient(var(--c), var(--c)) bottom right / var(--stroke) var(--corner) no-repeat,
-        rgb(206, 225, 221);
+        rgba(8, 127, 140, 0.04);
 }
 .gap.near {
     --c: rgb(206, 225, 221);
