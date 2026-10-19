@@ -288,7 +288,7 @@ button {
         rgba(8, 127, 140, 0.04);
 }
 .gap.near {
-    --c: var(--ligo-light-blue);
+    --c: rgb(206, 225, 221);
     background-color: rgb(206, 225, 221);
 }
 .gap.filled {
