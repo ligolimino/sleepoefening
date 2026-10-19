@@ -285,7 +285,7 @@ button {
         linear-gradient(var(--c), var(--c)) bottom left / var(--stroke) var(--corner) no-repeat,
         linear-gradient(var(--c), var(--c)) bottom right / var(--corner) var(--stroke) no-repeat,
         linear-gradient(var(--c), var(--c)) bottom right / var(--stroke) var(--corner) no-repeat,
-        rgba(8, 127, 140, 0.04);
+        (rgb(206, 225, 221);
 }
 .gap.near {
     --c: rgb(206, 225, 221);
