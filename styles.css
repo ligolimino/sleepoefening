@@ -665,3 +665,75 @@ button {
 .feedback {
   margin-top: 10px;
 }
+/* ================================================================
+   10. Duidelijker invulvak in de kleine versie (Genially)
+   Op een drukke achtergrond is een licht wit vlak met een witte rand
+   beter te zien dan de fijne hoekjes.
+   ================================================================ */
+
+.app.compact .gap {
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow:
+        inset 0 0 0 2px rgba(255, 255, 255, 0.95),
+        0 1px 4px rgba(23, 48, 66, 0.12);
+}
+.app.compact .gap.near {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow:
+        inset 0 0 0 2px var(--teal),
+        0 1px 4px rgba(23, 48, 66, 0.12);
+}
+.app.compact .gap.filled {
+    background: none;
+    box-shadow: none;
+}
+
+/* Luisterknop boven een gewoon woord (elkwoord=ja): het woord krijgt
+   bovenaan dezelfde ruimte als een kaartje, zodat alle knoppen op
+   dezelfde hoogte staan. */
+.word-holder > .text {
+    padding-top: calc(var(--tile-mt, 0.12em) + 0.06em + 1.5px);
+}
+
+/* ================================================================
+   11. Getallenreeks (soort=getal)
+   Elk getal staat in een eigen wit vakje, even groot als het
+   invulvakje. Het lege vakje is gewoon een leeg wit vakje.
+   ================================================================ */
+
+.exercise.numbers {
+    column-gap: 0.35em;
+}
+.exercise.numbers .numbox {
+    width: var(--gap-w, 1.6em);
+    padding: 0 0.3em;
+    box-shadow: none;
+    cursor: default;
+    touch-action: auto;
+}
+.exercise.numbers .gap,
+.app.compact .exercise.numbers .gap {
+    margin: 0;
+    background: #fff;
+    box-shadow: inset 0 0 0 1.5px var(--tile-line);
+}
+.exercise.numbers .gap.near,
+.app.compact .exercise.numbers .gap.near {
+    background: #fff;
+    box-shadow: inset 0 0 0 2.5px var(--teal);
+}
+.exercise.numbers .gap.filled {
+    background: none;
+    box-shadow: none;
+}
+/* Kaartjes met getallen iets ruimer, zoals de vakjes erboven. */
+.number-mode .tile {
+    padding: 0 0.3em;
+}
+
+/* Korte woorden (de, en, ik) krijgen minstens de breedte van hun
+   luisterknop, zodat twee knoppen nooit tegen elkaar staan. */
+.word-holder {
+    min-width: calc(var(--snd) + 6px);
+    justify-content: center;
+}

@@ -69,6 +69,8 @@ over meerdere regels. Een leesteken blijft bij het woord ervoor staan.
 | `woord=ja` | Tijdens de oefening een afspeelknop onder het woord of de zin. Werkt in beide weergaven. |
 | `luister=ja` | Na een juist antwoord verschijnt naast het vinkje een luisterknop voor het volledige woord. Bij één woord wordt de opname vanzelf gezocht (zie hieronder); bij een zin vul je **Audio woord/zin** in. Werkt in beide weergaven. |
 | `klank=ja` | Boven elk vakje staat een kleine luisterknop met de klank die erin moet (bij een zin: het woord). Werkt in beide weergaven. |
+| `elkwoord=ja` | Bij een zin of getallenreeks: boven elk woord (of getal) een kleine luisterknop, ook boven wat er al staat. Een knop verschijnt alleen als de opname bestaat. |
+| `soort=getal` | Getallenreeks: elk getal staat in een eigen wit vakje (zie hieronder). |
 | `weg=ja` | Een gebruikt kaartje verdwijnt uit het keuzevak. Zonder deze optie blijft het staan en kan het meerdere keren gebruikt worden (handig bij `[k]i[k]`). |
 | `weergave=volledig` | De volledige versie. Zonder deze toevoeging krijg je alleen de onderkant, voor Genially. Instructie, afbeelding en audio worden dan genegeerd. |
 | `instructie=sleep` | Instructie-audio uit de repository **audio** (`instructies/`), anders uit `assets/audio/instructies/`. |
@@ -216,3 +218,28 @@ Sinds oktober 2026 staan alle opnames in één repository: **ligolimino/audio**
 blijven als tweede kans bestaan, zodat oudere links altijd blijven werken.
 Nieuwe opnames voeg je toe met de createpagina of rechtstreeks in de
 audio-repository.
+
+## Getallenreeks (soort=getal)
+
+Typ de getallen met een spatie ertussen en zet het ontbrekende getal tussen
+haakjes: `51 [52] 53`. Met `soort=getal` staat elk getal in een eigen wit
+vakje, even groot als het invulvak. De pijl maak je zelf in Genially.
+
+- De opnames komen uit `assets/audio/getallen/` (`0.mp3` tot `100.mp3`).
+- Met `elkwoord=ja` staat er boven elk getal een luisterknop.
+- Op de createpagina kies je bij **Vakjes voor** de knop **Getallen**. Typ je
+  alleen getallen, dan staat die knop vanzelf aan.
+
+Voorbeeld: `?oef=51%20[52]%2053&keuzes=54,58,52&soort=getal&elkwoord=ja`
+
+## Kleinere letters bij een zin of getallenreeks
+
+Een zin en een getallenreeks krijgen letters die iets kleiner zijn dan wat
+maximaal zou passen. De verhouding staat bovenaan in `app.js`:
+`SENTENCE_TEXT_SCALE` en `NUMBER_TEXT_SCALE` (1 = zo groot mogelijk).
+
+## Invulvak in de kleine versie
+
+In de kleine versie (Genially) is het lege vakje een licht wit vlak met een
+witte rand, zodat het ook op een drukke achtergrond goed te zien is. Dat
+staat in `styles.css`, deel 10.

@@ -34,6 +34,8 @@
     const SENTENCE_FOLDERS = [`${CENTRAL_AUDIO}zinnen/`, EXERCISE_AUDIO_FOLDER];
     const CENTRAL_WORD_AUDIO = `${CENTRAL_AUDIO}woorden/`;
     const CENTRAL_SOUNDS = `${CENTRAL_AUDIO}klanken/`;
+    // Opnames van de getallen 0 tot 100 (bv. getallen/52.mp3).
+    const CENTRAL_NUMBERS = `${CENTRAL_AUDIO}getallen/`;
 
     // Namen die Windows niet toelaat als bestandsnaam. De opname van
     // bv. het woord 'nul' heet daarom 'nul_.mp3'.
@@ -63,6 +65,12 @@
     // Vanaf hoeveel pixels beweging een aanraking slepen is (en geen tik).
     const DRAG_START_PX = 6;
 
+    // Hoe groot de letters zijn bij een zin of een getallenreeks, in
+    // verhouding tot de grootste maat die zou passen (1 = zo groot
+    // mogelijk). Kleiner maken: bv. 0.7.
+    const SENTENCE_TEXT_SCALE = 0.8;
+    const NUMBER_TEXT_SCALE = 0.8;
+
     /* ------------------------------------------------------------
        Link lezen
        ------------------------------------------------------------ */
@@ -86,6 +94,11 @@
         shuffle: isYes(param("mix")),
         useUp: isYes(param("weg")),
         sound: isYes(param("klank")),
+        // Een luisterknop boven elk woord van de zin (of elk getal van de
+        // reeks), ook boven de woorden die er al staan.
+        everyWord: isYes(param("elkwoord")),
+        // soort=getal: een getallenreeks, elk getal in een eigen vakje.
+        numbers: ["getal", "getallen"].includes(param("soort").toLowerCase()),
         // Na een juist antwoord een luisterknop voor het volledige woord.
         listenAfter: isYes(param("luister")),
         // Tijdens de oefening een afspeelknop voor het hele woord of de zin.
@@ -424,8 +437,20 @@
     // Wat moet de luisterknop boven een vakje laten horen? Bij letters en
     // klankgroepen de klank (ij en ei delen één opname), bij een woord in
     // een zin de woordopname.
+    function numberCandidates(value) {
+        return [`${CENTRAL_NUMBERS}${encodeURIComponent(value)}.mp3`];
+    }
+
     function soundCandidates(answer) {
         const value = answer.trim().toLowerCase();
+        if (/^\d+$/.test(value)) {
+            // Een getal: eerst de getallenmap.
+            return [...numberCandidates(String(Number(value))), ...wordFileCandidates(value)];
+        }
+        if (settings.everyWord && isSentence) {
+            // Een woord in een zin: de woordopname, niet een losse klank.
+            return wordFileCandidates(value);
+        }
         const soundName = value === "ij" || value === "ei" ? "ij-ei" : value;
         const soundFile = encodeURIComponent(soundName) + ".mp3";
         return [
@@ -436,13 +461,14 @@
         ];
     }
 
-    // Kleine luidsprekerknop boven een leeg vakje.
+    // Kleine luidsprekerknop boven een vakje of een woord.
     function soundButton(answer) {
         const button = el("button", "sound-btn is-hidden");
         button.type = "button";
         button.dataset.icon = "speaker";
-        button.dataset.label = "Luister naar de klank";
-        button.setAttribute("aria-label", "Luister naar de klank");
+        const label = isSentence ? "Luister naar het woord" : "Luister naar de klank";
+        button.dataset.label = label;
+        button.setAttribute("aria-label", label);
         setIcon(button, "speaker", false);
         let source = null;
         findAudio(soundCandidates(answer)).then((found) => {
@@ -470,6 +496,10 @@
                 "Zin met ontbrekend woord",
                 "?oef=Ik%20[drink]%20koffie.&keuzes=eet,drink,slaap",
             ],
+            [
+                "Getallenreeks met luisterknoppen",
+                "?oef=51%20[52]%2053&keuzes=54,58,52&soort=getal&elkwoord=ja",
+            ],
         ];
 
         const help = el("section", "help");
@@ -489,6 +519,8 @@
                 <tr><td><code>woord=ja</code></td><td>Tijdens de oefening een afspeelknop onder het woord of de zin.</td></tr>
                 <tr><td><code>luister=ja</code></td><td>Na een juist antwoord verschijnt een luisterknop voor het volledige woord.</td></tr>
                 <tr><td><code>klank=ja</code></td><td>Boven elk vakje een luisterknop met de klank (of het woord) die erin moet.</td></tr>
+                <tr><td><code>elkwoord=ja</code></td><td>Bij een zin of getallenreeks: boven elk woord (of getal) een luisterknop, ook boven wat er al staat.</td></tr>
+                <tr><td><code>soort=getal</code></td><td>Getallenreeks: elk getal in een eigen vakje, bv. <code>51 [52] 53</code>. Opnames uit de map <code>getallen/</code>.</td></tr>
                 <tr><td><code>weg=ja</code></td><td>Een gebruikt kaartje verdwijnt uit het keuzevak.</td></tr>
                 <tr><td><code>weergave=volledig</code></td><td>Volledige versie met instructie, afbeelding en audio. Zonder deze toevoeging: alleen de onderkant, voor Genially.</td></tr>
                 <tr><td><code>instructie=</code></td><td>Instructie-audio uit <code>${INSTRUCTION_FOLDER}</code> of een volledige link.</td></tr>
@@ -540,7 +572,12 @@
     const fullText = parts
         .map((p) => (p.type === "gap" ? p.answer : p.value))
         .join("");
-    const isSentence = /\s/.test(fullText.trim());
+    // Een getallenreeks wordt opgebouwd zoals een zin: elk getal is een
+    // apart stuk.
+    const isNumbers = settings.numbers;
+    const isSentence = isNumbers || /\s/.test(fullText.trim());
+    // Luisterknoppen boven de vakjes, of boven alle woorden of getallen.
+    const wordButtons = settings.everyWord && isSentence;
 
     document.title = `Letterlab — ${fullText.replace(/\s+/g, " ").trim()}`;
     if (settings.compact) {
@@ -548,6 +585,9 @@
         app.classList.add("compact");
     }
     app.classList.add(isSentence ? "sentence-mode" : "word-mode");
+    if (isNumbers) {
+        app.classList.add("number-mode");
+    }
 
     // Per vakje: welk kaartje erin staat (tekst en plaats in het keuzevak).
     const state = {
@@ -565,7 +605,10 @@
 
     function buildExerciseRow() {
         const row = el("div", isSentence ? "exercise sentence" : "exercise");
-        if (settings.sound) {
+        if (isNumbers) {
+            row.classList.add("numbers");
+        }
+        if (settings.sound || wordButtons) {
             row.classList.add("with-sound");
         }
         let chunk = el("span", "chunk");
@@ -586,7 +629,7 @@
                 gap.setAttribute("aria-label", "Leeg vakje");
                 gap.tabIndex = -1;
                 gapNodes.push(gap);
-                if (settings.sound) {
+                if (settings.sound || wordButtons) {
                     // Houder: de luisterknop zweeft boven het vakje, zodat
                     // de letters op één lijn blijven staan.
                     const holder = el("span", "gap-holder");
@@ -610,8 +653,22 @@
                 }
                 if (/^\s+$/.test(piece)) {
                     closeChunk();
+                    return;
+                }
+                // Bij een getallenreeks staat elk getal in een eigen wit
+                // vakje, even groot als de invulvakjes.
+                const node = isNumbers
+                    ? fillTile(el("span", "tile numbox"), piece)
+                    : el("span", "text", piece);
+                // Het woord zonder leestekens, voor de luisterknop.
+                const spoken = piece.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+                if (wordButtons && spoken) {
+                    const holder = el("span", "gap-holder word-holder");
+                    holder.appendChild(soundButton(spoken));
+                    holder.appendChild(node);
+                    chunk.appendChild(holder);
                 } else {
-                    chunk.appendChild(el("span", "text", piece));
+                    chunk.appendChild(node);
                 }
             });
         });
@@ -694,7 +751,7 @@
         // - na het nakijken: het rijtje met vinkje of kruisje, eventueel de
         //   luisterknop (luister=ja) en de knop Opnieuw.
         const below = el("div", "below");
-        if (settings.wordDuring) {
+        if (settings.wordDuring && !isNumbers) {
             const candidates = wordAudioCandidates(fullText);
             if (candidates.length > 0) {
                 const wrap = el("div", "word-audio");
@@ -840,7 +897,9 @@
         const imageSizeSteps = (isWide) =>
             pictureNode && !isWide ? [36, 30, 24, 18, 12] : [0];
         const imageSizesFirst = () => imageSizeSteps(wide)[0];
-        const maxFs = isSentence
+        // Een getallenreeks heeft weinig, korte stukjes: die mogen groter
+        // dan een gewone zin.
+        const maxFs = isSentence && !isNumbers
             ? Math.min(96, height * 0.16)
             : Math.min(150, height * 0.3);
 
@@ -937,7 +996,14 @@
             allowedLines = best.lines;
         }
         layoutBank(best.rows);
-        apply(best.fs, best.imgH);
+        // Een zin of getallenreeks hoeft niet zo groot als een los woord.
+        let scale = 1;
+        if (isNumbers) {
+            scale = NUMBER_TEXT_SCALE;
+        } else if (isSentence) {
+            scale = SENTENCE_TEXT_SCALE;
+        }
+        apply(Math.max(minFs, best.fs * scale), best.imgH);
 
         // Na een juist antwoord blijven de vakjes zo breed als het antwoord,
         // ook als het scherm draait.
@@ -953,6 +1019,12 @@
         let widest = 0;
         tileNodes.forEach((tile) => {
             widest = Math.max(widest, tile.offsetWidth);
+        });
+        // Bij getallen zijn ook de gegeven getallen even breed.
+        exerciseNode.querySelectorAll(".numbox").forEach((box) => {
+            box.style.width = "auto";
+            widest = Math.max(widest, box.offsetWidth);
+            box.style.removeProperty("width");
         });
         if (widest > 0) {
             app.style.setProperty("--gap-w", `${widest}px`);
@@ -1038,7 +1110,7 @@
             gapNodes.forEach((gap) => gap.classList.add("good"));
             feedbackNode.className = "feedback good";
             feedbackNode.appendChild(icon("check"));
-            if (settings.listenAfter) {
+            if (settings.listenAfter && !isNumbers) {
                 const candidates = wordAudioCandidates(fullText);
                 if (candidates.length > 0) {
                     const listen = audioButton(candidates, "Luister naar het woord");
