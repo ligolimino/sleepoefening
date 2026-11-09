@@ -271,7 +271,9 @@ button {
     display: inline-flex;
     align-items: baseline;
     width: var(--gap-w, 1.2em);
-    margin: 0 0.04em;
+    /* Een geheel aantal pixels (gezet in app.js), zodat de ruimte tussen
+       alle vakjes even groot is. */
+    margin: 0 var(--gap-m, 0.04em);
     border-radius: 0.16em;
     touch-action: none;
     cursor: default;

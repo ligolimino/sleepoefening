@@ -1042,6 +1042,11 @@
         if (widest > 0) {
             app.style.setProperty("--gap-w", `${widest}px`);
         }
+        // Ruimte naast elk vakje: hele pixels. Met een kommagetal rondt de
+        // browser elke rand anders af en lijken sommige vakjes dichter bij
+        // elkaar te staan dan andere.
+        const fs = parseFloat(getComputedStyle(exerciseNode).fontSize) || 40;
+        app.style.setProperty("--gap-m", `${Math.max(2, Math.round(fs * 0.05))}px`);
     }
 
     /* ------------------------------------------------------------
