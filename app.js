@@ -109,7 +109,18 @@
         instruction: param("instructie"),
         image: param("beeld"),
         audio: param("audio"),
+        // grootte=125: letters 125 % van de gewone grootte (50 tot 200).
+        // De letters worden nooit groter dan er plaats is.
+        textSize: textSizeFactor(param("grootte")),
     };
+
+    function textSizeFactor(value) {
+        const number = Number.parseFloat(String(value).replace(",", "."));
+        if (!Number.isFinite(number) || number <= 0) {
+            return 1;
+        }
+        return Math.min(2, Math.max(0.5, number / 100));
+    }
 
     /* ------------------------------------------------------------
        Oefening ontleden: alles tussen [ ] is een vakje
@@ -899,9 +910,9 @@
         const imageSizesFirst = () => imageSizeSteps(wide)[0];
         // Een getallenreeks heeft weinig, korte stukjes: die mogen groter
         // dan een gewone zin.
-        const maxFs = isSentence && !isNumbers
+        const maxFs = (isSentence && !isNumbers
             ? Math.min(96, height * 0.16)
-            : Math.min(150, height * 0.3);
+            : Math.min(150, height * 0.3)) * Math.max(1, settings.textSize);
 
         const apply = (fs, imgH) => {
             app.style.setProperty("--fs", `${fs.toFixed(1)}px`);
@@ -1003,6 +1014,8 @@
         } else if (isSentence) {
             scale = SENTENCE_TEXT_SCALE;
         }
+        // grootte= in de link, maar nooit groter dan wat past.
+        scale = Math.min(1, scale * settings.textSize);
         apply(Math.max(minFs, best.fs * scale), best.imgH);
 
         // Na een juist antwoord blijven de vakjes zo breed als het antwoord,
