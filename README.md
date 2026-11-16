@@ -72,7 +72,6 @@ over meerdere regels. Een leesteken blijft bij het woord ervoor staan.
 | `klank=ja` | Boven elk vakje staat een kleine luisterknop met de klank die erin moet (bij een zin: het woord). Werkt in beide weergaven. |
 | `elkwoord=ja` | Bij een zin of getallenreeks: boven elk woord (of getal) een kleine luisterknop, ook boven wat er al staat. Een knop verschijnt alleen als de opname bestaat. |
 | `soort=getal` | Getallenreeks: elk getal staat in een eigen wit vakje (zie hieronder). |
-| `soort=koppel` | Koppels onder elkaar, bv. hoofdletter bij kleine letter (zie hieronder). |
 | `weg=ja` | Een gebruikt kaartje verdwijnt uit het keuzevak. Zonder deze optie blijft het staan en kan het meerdere keren gebruikt worden (handig bij `[k]i[k]`). |
 | `weergave=volledig` | De volledige versie. Zonder deze toevoeging krijg je alleen de onderkant, voor Genially. Instructie, afbeelding en audio worden dan genegeerd. |
 | `instructie=sleep` | Instructie-audio uit de repository **audio** (`instructies/`), anders uit `assets/audio/instructies/`. |
@@ -256,19 +255,3 @@ met `|` in plaats van komma's: `keuzes=.|,|?|!`. Staat er een `|` in de
 lijst, dan telt alleen de `|` als scheiding. Op de createpagina gebeurt dat
 vanzelf: tik in de zin op het leesteken en kies daaronder de extra
 leestekens.
-
-## Koppels (soort=koppel)
-
-Bijvoorbeeld een hoofdletter bij een kleine letter. Typ de paren met een
-spatie ertussen: `a[A] e[E] o[O] i[I] u[U]`. Elke kleine letter staat in een
-wit vakje, het invulvak staat eronder. Zet je het vakje vooraan (`[A]a`),
-dan staat het invulvak erboven.
-
-- Met `klank=ja` staat boven elk paar een luisterknop met de klank van de
-  gegeven letter.
-- De controle let op hoofdletters: `A` is niet `a`.
-- Op de createpagina: typ `a e o i u`, kies bij **Vakjes voor** de knop
-  **Koppels** en kies of de cursist hoofdletters of kleine letters sleept.
-- Geef het insluitvak in Genially iets meer hoogte (bv. 260 px).
-
-Voorbeeld: `?oef=a[A]%20e[E]%20o[O]%20i[I]%20u[U]&soort=koppel&klank=ja&mix=ja`

@@ -70,7 +70,6 @@
     // mogelijk). Kleiner maken: bv. 0.7.
     const SENTENCE_TEXT_SCALE = 0.8;
     const NUMBER_TEXT_SCALE = 0.8;
-    const PAIR_TEXT_SCALE = 0.85;
 
     /* ------------------------------------------------------------
        Link lezen
@@ -100,9 +99,6 @@
         everyWord: isYes(param("elkwoord")),
         // soort=getal: een getallenreeks, elk getal in een eigen vakje.
         numbers: ["getal", "getallen"].includes(param("soort").toLowerCase()),
-        // soort=koppel: paren onder elkaar, bv. a[A] e[E]. Wat gegeven is
-        // staat in een wit vakje, het invulvak eronder (of erboven).
-        pairs: ["koppel", "koppels", "paar", "paren"].includes(param("soort").toLowerCase()),
         // Na een juist antwoord een luisterknop voor het volledige woord.
         listenAfter: isYes(param("luister")),
         // Tijdens de oefening een afspeelknop voor het hele woord of de zin.
@@ -469,7 +465,7 @@
             // Een getal: eerst de getallenmap.
             return [...numberCandidates(String(Number(value))), ...wordFileCandidates(value)];
         }
-        if (settings.everyWord && isSentence && !isPairs) {
+        if (settings.everyWord && isSentence) {
             // Een woord in een zin: de woordopname, niet een losse klank.
             return wordFileCandidates(value);
         }
@@ -520,10 +516,6 @@
             ],
             ["Leesteken op het einde van de zin", "?oef=Ik%20ben%20Kim[.]&keuzes=.,%3F"],
             [
-                "Hoofdletter bij kleine letter",
-                "?oef=a[A]%20e[E]%20o[O]%20i[I]%20u[U]&soort=koppel&klank=ja&mix=ja",
-            ],
-            [
                 "Getallenreeks met luisterknoppen",
                 "?oef=51%20[52]%2053&keuzes=54,58,52&soort=getal&elkwoord=ja",
             ],
@@ -549,7 +541,6 @@
                 <tr><td><code>klank=ja</code></td><td>Boven elk vakje een luisterknop met de klank (of het woord) die erin moet.</td></tr>
                 <tr><td><code>elkwoord=ja</code></td><td>Bij een zin of getallenreeks: boven elk woord (of getal) een luisterknop, ook boven wat er al staat.</td></tr>
                 <tr><td><code>soort=getal</code></td><td>Getallenreeks: elk getal in een eigen vakje, bv. <code>51 [52] 53</code>. Opnames uit de map <code>getallen/</code>.</td></tr>
-                <tr><td><code>soort=koppel</code></td><td>Koppels onder elkaar, bv. <code>a[A] e[E] o[O]</code>: het gegeven teken in een wit vakje, het invulvak eronder. Met <code>klank=ja</code> staat er een luisterknop boven elk paar.</td></tr>
                 <tr><td><code>weg=ja</code></td><td>Een gebruikt kaartje verdwijnt uit het keuzevak.</td></tr>
                 <tr><td><code>weergave=volledig</code></td><td>Volledige versie met instructie, afbeelding en audio. Zonder deze toevoeging: alleen de onderkant, voor Genially.</td></tr>
                 <tr><td><code>instructie=</code></td><td>Instructie-audio uit <code>${INSTRUCTION_FOLDER}</code> of een volledige link.</td></tr>
@@ -603,15 +594,10 @@
         .join("");
     // Een getallenreeks wordt opgebouwd zoals een zin: elk getal is een
     // apart stuk.
-    const isPairs = settings.pairs;
-    const isNumbers = settings.numbers && !isPairs;
-    // Koppels gedragen zich bij het schalen als een zin: elk paar is een
-    // stuk dat naar een volgende regel kan.
-    const isSentence = isNumbers || isPairs || /\s/.test(fullText.trim());
+    const isNumbers = settings.numbers;
+    const isSentence = isNumbers || /\s/.test(fullText.trim());
     // Luisterknoppen boven de vakjes, of boven alle woorden of getallen.
-    const wordButtons = settings.everyWord && isSentence && !isPairs;
-    // Geen luisterknop voor 'het hele woord' bij getallen of koppels.
-    const noWholeAudio = isNumbers || isPairs;
+    const wordButtons = settings.everyWord && isSentence;
 
     document.title = `Letterlab — ${fullText.replace(/\s+/g, " ").trim()}`;
     if (settings.compact) {
@@ -621,9 +607,6 @@
     app.classList.add(isSentence ? "sentence-mode" : "word-mode");
     if (isNumbers) {
         app.classList.add("number-mode");
-    }
-    if (isPairs) {
-        app.classList.add("pair-mode");
     }
 
     // Per vakje: welk kaartje erin staat (tekst en plaats in het keuzevak).
@@ -640,67 +623,7 @@
     let bankNode;
     let pictureNode = null;
 
-    // Koppels: elk paar staat in een eigen kolom. Wat gegeven is staat in
-    // een wit vakje; het invulvak staat eronder (of erboven, als je het
-    // vakje eerst typt: [A]a). Een luisterknop (klank=ja) staat boven de
-    // kolom en laat de klank van het gegeven teken horen.
-    function buildPairRow() {
-        const row = el("div", "exercise sentence pairs");
-        const withSound = settings.sound || settings.everyWord;
-        if (withSound) {
-            row.classList.add("with-sound");
-        }
-        let column = el("span", "chunk pair");
-        let spoken = "";
-        let gapIndex = 0;
-
-        const closeColumn = () => {
-            if (column.childNodes.length > 0) {
-                if (withSound && spoken) {
-                    column.prepend(soundButton(spoken));
-                }
-                row.appendChild(column);
-            }
-            column = el("span", "chunk pair");
-            spoken = "";
-        };
-
-        parts.forEach((part) => {
-            if (part.type === "gap") {
-                const gap = el("span", "gap");
-                gap.dataset.index = String(gapIndex);
-                gap.setAttribute("role", "button");
-                gap.setAttribute("aria-label", "Leeg vakje");
-                gap.tabIndex = -1;
-                gapNodes.push(gap);
-                column.appendChild(gap);
-                if (!spoken) {
-                    spoken = part.answer;
-                }
-                gapIndex += 1;
-                return;
-            }
-            part.value.split(/(\s+)/).forEach((piece) => {
-                if (piece === "") {
-                    return;
-                }
-                if (/^\s+$/.test(piece)) {
-                    closeColumn();
-                    return;
-                }
-                column.appendChild(fillTile(el("span", "tile numbox"), piece));
-                // De klank van het gegeven teken gaat voor.
-                spoken = piece;
-            });
-        });
-        closeColumn();
-        return row;
-    }
-
     function buildExerciseRow() {
-        if (isPairs) {
-            return buildPairRow();
-        }
         const row = el("div", isSentence ? "exercise sentence" : "exercise");
         if (isNumbers) {
             row.classList.add("numbers");
@@ -848,7 +771,7 @@
         // - na het nakijken: het rijtje met vinkje of kruisje, eventueel de
         //   luisterknop (luister=ja) en de knop Opnieuw.
         const below = el("div", "below");
-        if (settings.wordDuring && !noWholeAudio) {
+        if (settings.wordDuring && !isNumbers) {
             const candidates = wordAudioCandidates(fullText);
             if (candidates.length > 0) {
                 const wrap = el("div", "word-audio");
@@ -996,7 +919,7 @@
         const imageSizesFirst = () => imageSizeSteps(wide)[0];
         // Een getallenreeks heeft weinig, korte stukjes: die mogen groter
         // dan een gewone zin.
-        const maxFs = (isSentence && !isNumbers && !isPairs
+        const maxFs = (isSentence && !isNumbers
             ? Math.min(96, height * 0.16)
             : Math.min(150, height * 0.3)) * Math.max(1, settings.textSize);
 
@@ -1095,9 +1018,7 @@
         layoutBank(best.rows);
         // Een zin of getallenreeks hoeft niet zo groot als een los woord.
         let scale = 1;
-        if (isPairs) {
-            scale = PAIR_TEXT_SCALE;
-        } else if (isNumbers) {
+        if (isNumbers) {
             scale = NUMBER_TEXT_SCALE;
         } else if (isSentence) {
             scale = SENTENCE_TEXT_SCALE;
@@ -1216,7 +1137,7 @@
             gapNodes.forEach((gap) => gap.classList.add("good"));
             feedbackNode.className = "feedback good";
             feedbackNode.appendChild(icon("check"));
-            if (settings.listenAfter && !noWholeAudio) {
+            if (settings.listenAfter && !isNumbers) {
                 const candidates = wordAudioCandidates(fullText);
                 if (candidates.length > 0) {
                     const listen = audioButton(candidates, "Luister naar het woord");
