@@ -740,3 +740,38 @@ button {
     justify-content: center;
 }
 
+
+/* ================================================================
+   Vaste nieuwe regels en uitlijning
+   ================================================================ */
+
+/* Met een Enter in de oefening staat elke regel in een eigen blok.
+   Het geheel blijft in het midden van het vlak; de regels staan in het
+   midden of (met uitlijning=links) links onder elkaar. */
+.exercise.multiline {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    column-gap: 0;
+}
+.exercise .line {
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    row-gap: 0.32em;
+    column-gap: 0.28em;
+}
+.exercise.with-sound .line {
+    row-gap: calc(var(--snd) + 12px);
+}
+.app.align-left .exercise.sentence {
+    justify-content: flex-start;
+}
+.app.align-left .exercise.multiline {
+    align-items: flex-start;
+}
+.app.align-left .exercise .line {
+    justify-content: flex-start;
+}

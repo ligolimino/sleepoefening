@@ -112,6 +112,9 @@
         // grootte=125: letters 125 % van de gewone grootte (50 tot 200).
         // De letters worden nooit groter dan er plaats is.
         textSize: textSizeFactor(param("grootte")),
+        // uitlijning=links: de regels van een zin beginnen links onder
+        // elkaar. Zonder deze toevoeging staat alles in het midden.
+        alignLeft: param("uitlijning").toLowerCase() === "links",
     };
 
     function textSizeFactor(value) {
@@ -541,6 +544,8 @@
                 <tr><td><code>klank=ja</code></td><td>Boven elk vakje een luisterknop met de klank (of het woord) die erin moet.</td></tr>
                 <tr><td><code>elkwoord=ja</code></td><td>Bij een zin of getallenreeks: boven elk woord (of getal) een luisterknop, ook boven wat er al staat.</td></tr>
                 <tr><td><code>soort=getal</code></td><td>Getallenreeks: elk getal in een eigen vakje, bv. <code>51 [52] 53</code>. Opnames uit de map <code>getallen/</code>.</td></tr>
+                <tr><td><code>uitlijning=links</code></td><td>De regels van een zin beginnen links onder elkaar. Zonder deze toevoeging: in het midden.
+                    Een nieuwe regel maak je met <code>%0A</code> in de oefening.</td></tr>
                 <tr><td><code>weg=ja</code></td><td>Een gebruikt kaartje verdwijnt uit het keuzevak.</td></tr>
                 <tr><td><code>weergave=volledig</code></td><td>Volledige versie met instructie, afbeelding en audio. Zonder deze toevoeging: alleen de onderkant, voor Genially.</td></tr>
                 <tr><td><code>instructie=</code></td><td>Instructie-audio uit <code>${INSTRUCTION_FOLDER}</code> of een volledige link.</td></tr>
@@ -608,6 +613,13 @@
     if (isNumbers) {
         app.classList.add("number-mode");
     }
+    if (settings.alignLeft) {
+        app.classList.add("align-left");
+    }
+    // Een Enter in de tekst (%0A in de link) is een vaste nieuwe regel.
+    const forcedLines = isSentence
+        ? fullText.trim().split(/[ \t]*\n\s*/).length
+        : 1;
 
     // Per vakje: welk kaartje erin staat (tekst en plaats in het keuzevak).
     const state = {
@@ -631,14 +643,30 @@
         if (settings.sound || wordButtons) {
             row.classList.add("with-sound");
         }
+        // Met vaste nieuwe regels staat elke regel in een eigen blok. Zo
+        // kunnen de regels links of in het midden onder elkaar staan.
+        const multiline = forcedLines > 1;
+        let line = row;
+        if (multiline) {
+            row.classList.add("multiline");
+            line = el("div", "line");
+        }
         let chunk = el("span", "chunk");
         let gapIndex = 0;
 
         const closeChunk = () => {
             if (chunk.childNodes.length > 0) {
-                row.appendChild(chunk);
+                line.appendChild(chunk);
             }
             chunk = el("span", "chunk");
+        };
+
+        const closeLine = () => {
+            closeChunk();
+            if (multiline && line.childNodes.length > 0) {
+                row.appendChild(line);
+                line = el("div", "line");
+            }
         };
 
         parts.forEach((part) => {
@@ -672,7 +700,11 @@
                     return;
                 }
                 if (/^\s+$/.test(piece)) {
-                    closeChunk();
+                    if (piece.includes("\n")) {
+                        closeLine();
+                    } else {
+                        closeChunk();
+                    }
                     return;
                 }
                 // Bij een getallenreeks staat elk getal in een eigen wit
@@ -692,7 +724,7 @@
                 }
             });
         });
-        closeChunk();
+        closeLine();
         return row;
     }
 
@@ -798,12 +830,17 @@
     // Op hoeveel regels staat de zin nu?
     // (Een woord met een vakje is hoger dan een gewoon woord. Daarom tellen
     // we een nieuwe regel pas als een woord volledig onder de vorige staat.)
+    function exerciseChunks() {
+        return exerciseNode.querySelectorAll(":scope > .chunk, :scope > .line > .chunk");
+    }
+
     function exerciseLines() {
         let lines = 0;
         let lineBottom = -Infinity;
-        exerciseNode.querySelectorAll(":scope > .chunk").forEach((chunk) => {
-            const top = chunk.offsetTop;
-            const bottom = top + chunk.offsetHeight;
+        exerciseChunks().forEach((chunk) => {
+            const rect = chunk.getBoundingClientRect();
+            const top = rect.top;
+            const bottom = rect.bottom;
             if (top >= lineBottom - 2) {
                 lines += 1;
                 lineBottom = bottom;
@@ -995,12 +1032,13 @@
             // Een zin gaat alleen over een extra regel als de letters
             // daardoor merkbaar groter worden, en er staan gemiddeld minstens
             // twee woorden op een regel (nooit één woord alleen).
-            const words = exerciseNode.querySelectorAll(":scope > .chunk").length;
-            const maxLines = Math.max(1, Math.floor(words / 2));
+            // Vaste nieuwe regels (Enter) tellen altijd mee.
+            const words = exerciseChunks().length;
+            const maxLines = Math.max(1, forcedLines, Math.floor(words / 2));
             allowedLines = 99;
             layoutBank(1);
             apply(minFs, imageSizes[0]);
-            let lines = Math.min(exerciseLines(), maxLines);
+            let lines = Math.max(forcedLines, Math.min(exerciseLines(), maxLines));
             allowedLines = lines;
             best = { ...bestLayout(), lines };
             while (lines < maxLines) {

@@ -56,6 +56,7 @@ Wat ontbreekt, zet je tussen vierkante haken:
 | `[sch]oen` | een vakje voor een klankgroep |
 | `Ik [drink] koffie.` | een zin met één ontbrekend woord |
 | `Ik ben Kim[.]` | een zin met een ontbrekend leesteken |
+| `Ik [drink] koffie.%0AJij eet brood.` | twee zinnen, elk op een eigen regel (`%0A` is een Enter; in de createpagina druk je gewoon op Enter) |
 
 Alles met een spatie erin wordt als zin getoond. Lange zinnen lopen vanzelf
 over meerdere regels. Een leesteken blijft bij het woord ervoor staan.
@@ -72,6 +73,7 @@ over meerdere regels. Een leesteken blijft bij het woord ervoor staan.
 | `klank=ja` | Boven elk vakje staat een kleine luisterknop met de klank die erin moet (bij een zin: het woord). Werkt in beide weergaven. |
 | `elkwoord=ja` | Bij een zin of getallenreeks: boven elk woord (of getal) een kleine luisterknop, ook boven wat er al staat. Een knop verschijnt alleen als de opname bestaat. |
 | `soort=getal` | Getallenreeks: elk getal staat in een eigen wit vakje (zie hieronder). |
+| `uitlijning=links` | Bij een zin: de regels beginnen links onder elkaar. Zonder deze toevoeging staat alles in het midden. Het blok als geheel blijft in het midden van het insluitvak. |
 | `weg=ja` | Een gebruikt kaartje verdwijnt uit het keuzevak. Zonder deze optie blijft het staan en kan het meerdere keren gebruikt worden (handig bij `[k]i[k]`). |
 | `weergave=volledig` | De volledige versie. Zonder deze toevoeging krijg je alleen de onderkant, voor Genially. Instructie, afbeelding en audio worden dan genegeerd. |
 | `instructie=sleep` | Instructie-audio uit de repository **audio** (`instructies/`), anders uit `assets/audio/instructies/`. |
